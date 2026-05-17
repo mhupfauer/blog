@@ -36,6 +36,10 @@ Reverse-chronological, with links where the event still has a public page.
 - **Pulse of Insurance — 2025.** AI security session for the insurance audience.
 - **BSides Dresden — 2024.** Community talk on AI security in practice.
 
+## Recognition
+
+- **WirtschaftsWoche *Best of Consulting* 2025 — 3rd place, Data & AI** for a team project on the safe use of generative AI in customer service — [announcement](https://kpmg.com/de/en/insights/business-performance-and-resilience/best-of-consulting-2025.html)
+
 ## References I lean on
 
 - [OWASP Top 10 for LLM Applications](https://genai.owasp.org/llm-top-10/) — the reference I keep coming back to
