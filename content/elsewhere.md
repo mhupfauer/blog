@@ -27,7 +27,14 @@ Author archive: [klardenker.kpmg.de](https://klardenker.kpmg.de/financialservice
 
 ## Speaking
 
-- *Digital X — Focus Edition AI* (2025) — [speaker page](https://www.digital-x.com/en/events/2025/focus-edition-ai-p27/speaker/markus-hupfauer-p482)
+Reverse-chronological, with links where the event still has a public page.
+
+- **Cybersecurity Meetup Munich — April 2026.** *Security in the Age of Computer Use Agents (with live demo)* — [event page](https://security-network-munich.org/cybersecurity-meetup-munich-april-edition-kpmg/)
+- **it-sa Expo, Nürnberg — October 2025.** *Your current security doesn't see AI: No logging, no protection, no way back!* — [session page](https://www.itsa365.de/de-de/actions-events/2025/it-sa-expo/knowledge-c/your-current-security-doesnt-see-ai-no-logging-no-protection-no-way-back-kpmg)
+- **Digital X — Focus Edition AI, 2025.** Panel/talk — [speaker page](https://www.digital-x.com/en/events/2025/focus-edition-ai-p27/speaker/markus-hupfauer-p482)
+- **VIB DORA-Seminar, Frankfurt — May 2025.** Two sessions with Christian Nern: *DORA und operative IKT-Sicherheit*, and *Verschlüsselung und weitere Sicherheitskonzepte* — [programme (PDF)](https://www.vib.network//wp-content/uploads/2025/04/Einladung_DORA_19052025.pdf)
+- **Pulse of Insurance — 2025.** AI security session for the insurance audience.
+- **BSides Dresden — 2024.** Community talk on AI security in practice.
 
 ## References I lean on
 
