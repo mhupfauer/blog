@@ -31,7 +31,7 @@ When asked to write a new post, the established workflow is:
 2. Set frontmatter `cover.image: "/covers/<slug>.png"` and reserve the cover.
 3. Dispatch parallel critique agents against the draft. The user's preferred reviewer set is `gpt-5.5`, `gpt-5.4`, and `gpt-5.3-chat-latest` via the OpenAI Chat Completions API. Run all three in parallel. Their critiques converge sharply — treat unanimous feedback as binding, 2-of-3 as strong, individual as suggestion.
 4. Revise based on the consolidated critique. Do *not* push between draft and revision — the user sees the result, not the iterations.
-5. Generate a cover image via OpenAI `gpt-image-2` (1536x1024, then sips-pad/crop as needed). Style guide for covers, applied across all posts so the site reads coherent:
+5. Generate a cover image via `./scripts/gen-cover.py <slug> "<concept>" "<alt>"` (gitignored local script with the OpenAI key hardcoded; bakes in the style guide and writes to `static/covers/<slug>.png`). Style guide for covers, applied across all posts so the site reads coherent:
    - Deep ink black background (`#0A0A0A`)
    - Off-white geometric forms, thin precise strokes
    - One muted accent: warm rust / clay orange (`~#C25A2E`)
