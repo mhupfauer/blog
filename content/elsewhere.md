@@ -33,7 +33,15 @@ Reverse-chronological, with links where the event still has a public page.
 - **it-sa Expo, Nürnberg — October 2025.** *Your current security doesn't see AI: No logging, no protection, no way back!* — [session page](https://www.itsa365.de/de-de/actions-events/2025/it-sa-expo/knowledge-c/your-current-security-doesnt-see-ai-no-logging-no-protection-no-way-back-kpmg)
 - **Digital X — Focus Edition AI, 2025.** Panel/talk — [speaker page](https://www.digital-x.com/en/events/2025/focus-edition-ai-p27/speaker/markus-hupfauer-p482)
 - **VIB DORA-Seminar, Frankfurt — May 2025.** Two sessions with Christian Nern: *DORA und operative IKT-Sicherheit*, and *Verschlüsselung und weitere Sicherheitskonzepte* — [programme (PDF)](https://www.vib.network//wp-content/uploads/2025/04/Einladung_DORA_19052025.pdf)
-- **Pulse of Insurance — 2025.** *Künstliche Intelligenz: Compliance first, Innovation second?* — [event page](https://www.events.kpmg.de/kpmg-pulse-of-insurance-2025)
+- **Pulse of Insurance — 2025.** *Künstliche Intelligenz: Compliance first, Innovation second?* — [event page](https://www.events.kpmg.de/kpmg-pulse-of-insurance-2025) · [event recap](https://videostream.kpmg.de/das-war-der-kpmg-pulse-of-insurance)
+
+  <div style="position:relative;padding-top:56.25%;margin:0.75rem 0 0.25rem;">
+    <iframe src="https://videostream.kpmg.de/v.ihtml/player.html?showDescriptions=0&source=site&photo_id=113204774&autoPlay=0"
+            title="KPMG Pulse of Insurance 2025 — recap"
+            loading="lazy"
+            allowfullscreen
+            style="position:absolute;inset:0;width:100%;height:100%;border:0;"></iframe>
+  </div>
 - **BSides Dresden — 2024.** *AI for You, Me, and the Neighbor's Dog: Is That a Good Idea?* — [speakers page](https://bsidesdresden.com/archives/2024-speakers.html)
 
 ## Recognition
