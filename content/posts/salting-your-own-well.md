@@ -8,9 +8,10 @@ description: "Can a defender weaponize the refusal behavior of commercial and op
 summary: "Defenders can deliberately plant content in their environments that triggers the refusal vectors of attacker-controlled agents. Against the median lazy adversary it works. Against a determined one with an abliterated model it doesn't. Either way, it is a sensor — not a control."
 canonicalURL: "https://hupfauer.one/posts/salting-your-own-well/"
 cover:
-  image: ""
-  alt: ""
-  hidden: true
+  image: "/covers/salting-your-own-well.png"
+  alt: "Data well with tripwire glyphs, one probe triggers a ripple"
+  hidden: false
+  relative: false
 ---
 
 A reader of [the last post](/posts/identity-is-the-control-plane/) asked the obvious inverse: if attackers use prompt injection offensively, can defenders use it back? Specifically — if I, the defender, deliberately *poison* my environment so that any LLM agent reading it trips its own refusal behavior, can I stop an agentic attack at the model layer?

@@ -8,11 +8,11 @@ description: "Prompt injection detection is a sensor on one input channel. Ident
 summary: "Detection asks 'is this input adversarial?' Identity asks 'what is this principal allowed to do, on whose behalf, right now?' The first is probabilistic and bypassable. The second is enforceable and auditable."
 canonicalURL: "https://hupfauer.one/posts/identity-is-the-control-plane/"
 cover:
-  image: ""
-  alt: ""
+  image: "/covers/identity-is-the-control-plane.png"
+  alt: "Identity perimeter deflecting one vector, permitting a credentialed one"
   caption: ""
   relative: false
-  hidden: true
+  hidden: false
 ---
 
 Walking the vendor floor at RSAC this year, the count was roughly 40% prompt injection detection products, maybe 5% anything resembling agentic identity. That ratio is inverted from where the risk actually sits — and the gap is widening as agents move from demos into systems that do things on people's behalf.
