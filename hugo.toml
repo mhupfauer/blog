@@ -2,6 +2,7 @@ baseURL = "https://hupfauer.one/"
 languageCode = "en-us"
 title = "Markus Hupfauer"
 theme = "PaperMod"
+timeZone = "Europe/Berlin"
 
 enableRobotsTXT = true
 buildDrafts = false

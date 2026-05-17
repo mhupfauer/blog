@@ -1,6 +1,6 @@
 ---
 title: "Auto mode is a sensor too"
-date: 2026-05-18
+date: 2026-05-18T09:00:00+02:00
 draft: false
 tags: ["agentic-ai", "security", "claude-code", "prompt-injection", "developer-tooling"]
 keywords: ["Claude Code auto mode", "dangerously-skip-permissions", "prompt injection developer", "agentic IDE security", "AI coding assistant attack", "MCP supply chain"]
