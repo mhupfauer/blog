@@ -1,0 +1,100 @@
+baseURL = "https://hupfauer.one/"
+languageCode = "en-us"
+title = "Markus Hupfauer"
+theme = "PaperMod"
+
+enableRobotsTXT = true
+buildDrafts = false
+buildFuture = false
+pygmentsUseClasses = true
+enableEmoji = true
+summaryLength = 40
+
+[sitemap]
+  changefreq = "weekly"
+  filename = "sitemap.xml"
+  priority = 0.5
+
+[minify]
+  disableXML = true
+  minifyOutput = true
+
+[permalinks]
+  posts = "/posts/:slug/"
+
+[params]
+  env = "production"
+  description = "Markus Hupfauer's personal notes on AI security, agentic systems, and non-human identity."
+  keywords = ["AI security", "agentic AI", "non-human identity", "NHI", "agent identity", "prompt injection", "OWASP", "Markus Hupfauer"]
+  author = "Markus Hupfauer"
+  DateFormat = "2006-01-02"
+  defaultTheme = "auto"
+  ShowReadingTime = true
+  ShowShareButtons = false
+  ShowPostNavLinks = true
+  ShowCodeCopyButtons = true
+  ShowToc = true
+  TocOpen = false
+  ShowRssButtonInSectionTermList = true
+  ShowFullTextinRSS = true
+  ShowWordCount = false
+  ShowBreadCrumbs = true
+  mainSections = ["posts"]
+  images = ["og-default.png"]
+
+  [params.homeInfoParams]
+    Title = "Markus Hupfauer"
+    Content = "Notes on AI security, agentic systems, and non-human identity. Personal site, personal opinions."
+
+  [params.schema]
+    type = "Person"
+
+  [params.assets]
+    disableHLJS = true
+    favicon = "/favicon.ico"
+    apple_touch_icon = "/apple-touch-icon.png"
+
+  [[params.socialIcons]]
+    name = "github"
+    url = "https://github.com/mhupfauer"
+  [[params.socialIcons]]
+    name = "linkedin"
+    url = "https://www.linkedin.com/in/markus-hupfauer/"
+  [[params.socialIcons]]
+    name = "rss"
+    url = "/index.xml"
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+
+[markup.highlight]
+  style = "github-dark"
+  lineNos = false
+  codeFences = true
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+[[menu.main]]
+  identifier = "posts"
+  name = "Posts"
+  url = "/posts/"
+  weight = 10
+
+[[menu.main]]
+  identifier = "elsewhere"
+  name = "Elsewhere"
+  url = "/elsewhere/"
+  weight = 20
+
+[[menu.main]]
+  identifier = "search"
+  name = "Search"
+  url = "/search/"
+  weight = 25
+
+[[menu.main]]
+  identifier = "imprint"
+  name = "Imprint"
+  url = "/imprint/"
+  weight = 30
