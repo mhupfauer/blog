@@ -11,9 +11,15 @@
     {{- $alt := (.Params.cover.alt | default .Params.cover.caption | plainify) }}
     {{- $responsiveImages := (.Params.cover.responsiveImages | default site.Params.cover.responsiveImages) | default true }}
 
-    {{- $pageBundleCover := (.Resources.ByType "image").GetMatch (printf "*%s*" (.Params.cover.image)) }}
-    {{- $globalResourcesCover := (resources.ByType "image").GetMatch (printf "*%s*" (.Params.cover.image)) }}
-    {{- $cover := (or $pageBundleCover $globalResourcesCover) }}
+    {{- /* Direct path lookup first (e.g. cover.image = "my-slug.jpg" → assets/covers/my-slug.jpg).
+           Falls back to PaperMod's wildcard matcher for page-bundle compatibility. */ -}}
+    {{- $coverPath := printf "covers/%s" (.Params.cover.image) }}
+    {{- $cover := resources.Get $coverPath }}
+    {{- if not $cover }}
+        {{- $pageBundleCover := (.Resources.ByType "image").GetMatch (printf "*%s*" (.Params.cover.image)) }}
+        {{- $globalResourcesCover := (resources.ByType "image").GetMatch (printf "*%s*" (.Params.cover.image)) }}
+        {{- $cover = (or $pageBundleCover $globalResourcesCover) }}
+    {{- end }}
 
     {{- $sizes := (slice "360" "480" "720" "1080" "1500") }}
     {{- $processableFormats := (slice "jpg" "jpeg" "png" "tif" "bmp" "gif") -}}
