@@ -1,0 +1,8 @@
+/* Tighten the gap between the home-info block (with social icons)
+   and the first post card. PaperMod's default min-height: 320px on
+   .first-entry forces a centered flex column that visually pushes
+   the post card far below the social icons. */
+.first-entry {
+    min-height: 0;
+    margin-top: calc(var(--gap) / 2);
+}
