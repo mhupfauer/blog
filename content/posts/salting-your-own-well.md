@@ -8,7 +8,7 @@ description: "Can a defender weaponize the refusal behavior of commercial and op
 summary: "Defenders can deliberately plant content in their environments that triggers the refusal vectors of attacker-controlled agents. Against the median lazy adversary it works. Against a determined one with an abliterated model it doesn't. Either way, it is a sensor — not a control."
 canonicalURL: "https://hupfauer.one/posts/salting-your-own-well/"
 cover:
-  image: "/covers/salting-your-own-well.png"
+  image: "/covers/salting-your-own-well.jpg"
   alt: "Data well with tripwire glyphs, one probe triggers a ripple"
   hidden: false
   relative: false

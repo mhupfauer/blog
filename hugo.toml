@@ -41,7 +41,7 @@ summaryLength = 40
   ShowWordCount = false
   ShowBreadCrumbs = true
   mainSections = ["posts"]
-  images = ["og-default.png"]
+  images = ["og-default.jpg"]
 
   [params.homeInfoParams]
     Title = "Markus Hupfauer"
