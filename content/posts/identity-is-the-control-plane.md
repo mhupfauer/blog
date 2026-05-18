@@ -8,7 +8,7 @@ description: "Prompt injection detection is a sensor on one input channel. Ident
 summary: "Detection asks 'is this input adversarial?' Identity asks 'what is this principal allowed to do, on whose behalf, right now?' The first is probabilistic and bypassable. The second is enforceable and auditable."
 canonicalURL: "https://hupfauer.one/posts/identity-is-the-control-plane/"
 cover:
-  image: "/covers/identity-is-the-control-plane.jpg"
+  image: "identity-is-the-control-plane.jpg"
   alt: "Identity perimeter deflecting one vector, permitting a credentialed one"
   caption: ""
   relative: false

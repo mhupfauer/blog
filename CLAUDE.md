@@ -64,17 +64,25 @@ GitHub keeps orphaned commits reachable by direct SHA for ~90 days after a force
 content/
   posts/                    # the trilogy and future posts
   elsewhere.md              # writing, speaking, recognition, profiles
-  imprint.md                # German Impressum (TMG §5)
+  imprint.md                # German Impressum (§5 DDG / §18 MStV)
   search.md                 # PaperMod fuse.js search page
 hugo.toml                   # all site config (SEO, menu, params)
-layouts/robots.txt          # custom robots.txt with sitemap pointer
+layouts/
+  robots.txt                # custom robots.txt with sitemap pointer
+  list.html                 # override: passes isFirst to cover.html for LCP
+  _partials/cover.html      # override: honors isFirst → eager + fetchpriority=high
+assets/
+  css/extended/custom.css   # auto-bundled by PaperMod; tightens .first-entry spacing
+  covers/                   # per-post covers; in assets/ so Hugo generates srcset + width/height
 static/
-  covers/                   # per-post cover images
-  og-default.png            # fallback OG card
+  og-default.jpg            # fallback OG card (kept in static for absolute-URL OG card scrapers)
   favicon.ico / .png / apple-touch-icon.png
 themes/PaperMod/            # submodule, do not modify directly
 archetypes/default.md       # `hugo new` template
+scripts/gen-cover.py        # gitignored; generates JPEG covers via OpenAI gpt-image-2
 ```
+
+**Cover image convention:** put files in `assets/covers/` (NOT `static/covers/`). Frontmatter references them by filename only: `cover.image: "my-slug.jpg"` — no leading slash, no path. PaperMod's cover.html matches on `*<filename>*` against the asset pipeline. Files in `static/` bypass Hugo's image processing entirely, which breaks responsive `srcset`, intrinsic `width`/`height` (→ CLS), and downscaling for mobile.
 
 ## What not to do
 

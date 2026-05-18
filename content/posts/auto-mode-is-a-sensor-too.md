@@ -8,7 +8,7 @@ description: "Claude Code's auto mode replaces a manual flag with a classifier t
 summary: "The third time this year I have written down the same epistemic mistake. Auto-accept loops in agentic IDEs trust a classifier to be a control. Real bypasses already exist. The sufficiently motivated attacker problem is now sitting on your laptop, deciding which files to edit while you make coffee."
 canonicalURL: "https://hupfauer.one/posts/auto-mode-is-a-sensor-too/"
 cover:
-  image: "/covers/auto-mode-is-a-sensor-too.jpg"
+  image: "auto-mode-is-a-sensor-too.jpg"
   alt: "Automated gate opens for expected form while off-shape form slips past"
   hidden: false
   relative: false
