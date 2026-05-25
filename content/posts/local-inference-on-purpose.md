@@ -54,7 +54,7 @@ claude
 
 omlx has a `claude_code` block in its settings (`mode: "local"`, `opus_model: "Qwen3.6-35B-A3B-UD-MLX-4bit"`) that handles the Anthropic-shape translation and routes the model name through. Context-window mismatches are real — a request shaped for 200k tokens does not actually fit in a 128k local context; omlx packs and truncates, you live with what that does to the long-tail prompts. For the kind of work this mode exists for, it's fine.
 
-That work is bounded. I'm on a plane, on a train through a tunnel, or sitting on conference Wi-Fi where I'd rather not push large work prompts even over TLS just for the metadata. The local model is not as good as Sonnet. It is, however, there. That's the entire feature. A 35B MoE on this machine is enough for "explain this stack trace," "draft the next test," "refactor this file" — bounded edits where the agentic loop matters more than raw model strength.
+That work is bounded — I'm on a plane, on a train through a tunnel, or sitting on conference Wi-Fi where I'd rather not push large work prompts even over TLS just for the metadata — but it's a much wider band than the "local models are toys" framing suggests. For a lot of what an agent loop actually does — explain this stack trace, draft the next test, refactor this file, walk a codebase — Qwen3.6-35B-A3B at 4-bit lands close enough to Sonnet that the gap doesn't decide the task. It's not better. It is, more often than I expected when I set this up, good enough that the question becomes whether the marginal quality is worth the marginal exposure.
 
 ## OpenCode, when the content is the threat model
 
@@ -70,6 +70,6 @@ OpenCode has no Anthropic-shaped client to redirect because it has no Anthropic-
 
 If the content itself is the risk, I want the control to be the absence of egress, not a vendor promise about what happens to it after egress. That's the entire argument. You can't classify your way out of "this should not have left the laptop" at runtime — it's a topology choice made before the request is constructed. The MacBook either has the weights or it doesn't. If it doesn't, no amount of careful prompting on the way out the door makes it not have left.
 
-The cost is real: a 35B MoE is not Sonnet, first-token latency on a cold model is seconds, and I lose the parts of the hosted experience that are genuinely good. The benefit is also real: there are tasks where the answer is allowed to be a little worse in exchange for being certain about where it came from.
+The cost is real but smaller than the cliché suggests: first-token latency on a cold model is seconds, the very hardest reasoning tasks still want the frontier model, and I lose the parts of the hosted experience that are genuinely good. The benefit is also real: for the broad middle of day-to-day work, the answer is close enough that being certain about where it came from is worth more than the marginal quality I'd get by sending it out.
 
 Both modes — CC-over-omlx, and OpenCode-over-omlx — live behind the same brew service. The difference between them isn't a tuning knob. It's an answer to a different question.
