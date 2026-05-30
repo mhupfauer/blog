@@ -1,0 +1,533 @@
+<!-- Interactive RAG ACL widget: flat vs. frozen ACL vs. live re-check. Self-contained, no deps. -->
+<div class="rag" data-ragacl>
+  <div class="rag-head">
+    <div class="rag-title">Ask the bot. Watch what it returns to <span class="rag-bob">Bob</span>.</div>
+    <div class="rag-sub">Same corpus, same query. Three common builds. Pick one and see which doors the index left open.</div>
+  </div>
+
+  <div class="rag-tabs" role="tablist" aria-label="Index build">
+    <button class="rag-tab" data-scn="flat" role="tab">Flat ingest</button>
+    <button class="rag-tab" data-scn="frozen" role="tab">ACL at index time</button>
+    <button class="rag-tab" data-scn="live" role="tab">Live re-check per hit</button>
+  </div>
+
+  <div class="rag-blurb" data-blurb></div>
+
+  <div class="rag-controls-top">
+    <div class="rag-queries" role="group" aria-label="Query">
+      <span class="rag-qlbl">Ask as Bob:</span>
+      <button class="rag-q" data-q="salaries">"salaries?"</button>
+      <button class="rag-q" data-q="roadmap">"Q3 roadmap?"</button>
+    </div>
+    <label class="rag-toggle">
+      <input type="checkbox" data-revoke>
+      <span class="rag-toggle-box" aria-hidden="true"></span>
+      <span class="rag-toggle-lbl">Alice&rsquo;s access to <b>DOC-3</b> was revoked yesterday at source.</span>
+    </label>
+  </div>
+
+  <div class="rag-grid">
+    <div class="rag-col">
+      <div class="rag-colhead">The corpus &middot; <span class="rag-mutedinline">5 docs, ingested by Alice</span></div>
+      <div class="rag-corpus" data-corpus></div>
+    </div>
+    <div class="rag-col">
+      <div class="rag-colhead">What the bot returns to <span class="rag-bob">Bob</span></div>
+      <div class="rag-response" data-response>
+        <div class="rag-empty">Pick a query above.</div>
+      </div>
+      <div class="rag-meter" data-meter></div>
+    </div>
+  </div>
+
+  <div class="rag-verdict">
+    <div class="rag-verdict-q">From the index alone, can you say&hellip;</div>
+    <div class="rag-verdict-pills">
+      <span class="rag-pill" data-pill-read><b>Bob</b> cannot read what he can&rsquo;t open at source? <i data-read>&mdash;</i></span>
+      <span class="rag-pill" data-pill-dsar>DSAR / <b>Purview</b> can enumerate this corpus? <i data-dsar>&mdash;</i></span>
+    </div>
+    <div class="rag-verdict-note" data-vnote></div>
+  </div>
+</div>
+
+<style>
+.rag {
+  --ink: #0c0c0d;
+  --panel: #151517;
+  --line: #2a2a2e;
+  --paper: #e9e6df;
+  --muted: #8d8d8a;
+  --rust: #c25a2e;
+  --rust-dim: #6b3a26;
+  color: var(--paper);
+  background: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1.1rem 1.1rem 1.25rem;
+  margin: 2rem 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.rag * { box-sizing: border-box; }
+.rag-title { font-weight: 700; font-size: 1.05rem; letter-spacing: 0.01em; }
+.rag-bob { color: var(--rust); font-weight: 700; }
+.rag-sub { color: var(--muted); font-size: 0.85rem; margin-top: 0.2rem; }
+.rag-mutedinline { color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; }
+
+.rag-tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.9rem 0 0.6rem; }
+.rag-tab {
+  background: transparent; color: var(--muted);
+  border: 1px solid var(--line); border-radius: 999px;
+  padding: 0.34rem 0.8rem; font-size: 0.82rem; cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.rag-tab:hover { color: var(--paper); }
+.rag-tab[aria-selected="true"] {
+  color: var(--ink); background: var(--paper); border-color: var(--paper); font-weight: 600;
+}
+.rag-blurb { color: var(--paper); font-size: 0.9rem; min-height: 1.4em; margin-bottom: 0.9rem; }
+.rag-blurb b { color: var(--rust); }
+
+.rag-controls-top {
+  display: flex; flex-wrap: wrap; gap: 0.7rem 1.2rem; align-items: center;
+  margin-bottom: 0.85rem;
+}
+.rag-queries { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
+.rag-qlbl { color: var(--muted); font-size: 0.82rem; margin-right: 0.2rem; }
+.rag-q {
+  background: transparent; color: var(--paper);
+  border: 1px solid var(--line); border-radius: 6px;
+  padding: 0.32rem 0.7rem; font-size: 0.82rem; cursor: pointer;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.rag-q:hover { border-color: var(--paper); }
+.rag-q.on { background: var(--rust); border-color: var(--rust); color: #fff; }
+
+.rag-toggle { display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.82rem; color: var(--paper); }
+.rag-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+.rag-toggle-box {
+  width: 32px; height: 18px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--panel); position: relative; transition: background .15s, border-color .15s;
+  flex-shrink: 0;
+}
+.rag-toggle-box::after {
+  content: ""; position: absolute; top: 2px; left: 2px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--muted); transition: left .15s, background .15s;
+}
+.rag-toggle input:checked + .rag-toggle-box { background: var(--rust-dim); border-color: var(--rust); }
+.rag-toggle input:checked + .rag-toggle-box::after { left: 16px; background: var(--rust); }
+.rag-toggle input:focus-visible + .rag-toggle-box { outline: 2px solid var(--paper); outline-offset: 2px; }
+.rag-toggle-lbl b { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--rust); font-weight: 700; }
+
+.rag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+@media (max-width: 640px) { .rag-grid { grid-template-columns: 1fr; } }
+.rag-col { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 0.7rem 0.8rem; }
+.rag-colhead {
+  font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--muted); margin-bottom: 0.6rem;
+}
+
+.rag-corpus { display: flex; flex-direction: column; gap: 0.45rem; }
+.rag-doc {
+  border: 1px solid var(--line); border-radius: 6px;
+  padding: 0.5rem 0.6rem; background: #131316;
+  position: relative; transition: border-color .15s, opacity .15s;
+}
+.rag-doc-row1 { display: flex; align-items: baseline; gap: 0.5rem; }
+.rag-doc-badge {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem; font-weight: 700; color: var(--rust);
+  border: 1px solid var(--rust-dim); border-radius: 3px;
+  padding: 0.04rem 0.3rem; flex-shrink: 0;
+}
+.rag-doc-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem; color: var(--muted);
+}
+.rag-doc-title { font-size: 0.85rem; color: var(--paper); margin-top: 0.15rem; font-weight: 500; }
+.rag-doc-acl {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem; color: var(--muted); margin-top: 0.3rem;
+}
+.rag-doc-acl b { color: var(--paper); font-weight: 500; }
+.rag-doc.revoked .rag-doc-acl b.revoked-name {
+  color: var(--rust); text-decoration: line-through; text-decoration-color: var(--rust);
+}
+.rag-doc.hit { border-color: var(--paper); }
+.rag-doc.miss { opacity: 0.45; }
+
+.rag-response { display: flex; flex-direction: column; gap: 0.45rem; min-height: 7rem; }
+.rag-empty { color: var(--muted); font-style: italic; font-size: 0.85rem; padding: 0.4rem 0; }
+.rag-hit {
+  border: 1px solid var(--line); border-radius: 6px;
+  padding: 0.5rem 0.6rem; background: #131316;
+  opacity: 0; transform: translateY(4px);
+  transition: opacity .25s, transform .25s, border-color .15s;
+}
+.rag-hit.show { opacity: 1; transform: none; }
+.rag-hit.leak { border-color: var(--rust-dim); }
+.rag-hit.ok { border-color: var(--paper); }
+.rag-hit-row1 { display: flex; align-items: baseline; gap: 0.5rem; }
+.rag-hit-title { font-size: 0.85rem; color: var(--paper); margin-top: 0.15rem; }
+.rag-hit-overlay {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem; margin-top: 0.3rem;
+}
+.rag-hit-overlay.bad { color: var(--rust); }
+.rag-hit-overlay.good { color: var(--paper); }
+.rag-hit-overlay b { font-weight: 700; }
+
+.rag-meter {
+  margin-top: 0.55rem; padding-top: 0.5rem;
+  border-top: 1px dashed var(--line);
+  font-size: 0.75rem; color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.rag-meter b { color: var(--paper); font-weight: 700; }
+.rag-meter .rag-meter-warn { color: var(--rust); }
+
+.rag-verdict { margin-top: 1rem; padding-top: 0.9rem; border-top: 1px solid var(--line); }
+.rag-verdict-q { font-size: 0.85rem; color: var(--muted); }
+.rag-verdict-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0; }
+.rag-pill {
+  border: 1px solid var(--line); border-radius: 999px; padding: 0.3rem 0.75rem; font-size: 0.85rem;
+}
+.rag-pill b { font-weight: 700; }
+.rag-pill i { font-style: normal; font-weight: 700; margin-left: 0.25rem; }
+.rag-pill.yes { border-color: var(--paper); }
+.rag-pill.yes i { color: var(--paper); }
+.rag-pill.no { border-color: var(--rust); }
+.rag-pill.no i { color: var(--rust); }
+.rag-verdict-note { font-size: 0.88rem; min-height: 1.3em; }
+.rag-verdict-note b { color: var(--rust); }
+.rag-verdict-note code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.82rem; color: var(--paper);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rag-hit, .rag-doc, .rag-toggle-box, .rag-toggle-box::after { transition: none; }
+}
+</style>
+
+<script>
+(function () {
+  // Bob's identity: a colleague Alice shared the bot URL with. Group membership at source:
+  var BOB_GROUPS = ["Eng-All", "SRE"]; // not HR-Read, not Exec-All, not Board
+
+  // Corpus. Each doc has a stable id, source-system badge, title, topic, and ACLs.
+  // sourceAcl is "today, at the origin system" (mutable by toggle for DOC-3).
+  // indexAcl is "frozen snapshot at ingest" — never re-syncs.
+  var DOCS = [
+    { id: "DOC-1", src: "SP", title: "Q3 roadmap.docx",
+      sourceAcl: ["Alice", "Bob", "Eng-All"], indexAcl: ["Alice", "Bob", "Eng-All"],
+      topic: "roadmap" },
+    { id: "DOC-2", src: "SP", title: "Comp band guidance 2026.pdf",
+      sourceAcl: ["Alice", "HR-Read"], indexAcl: ["Alice", "HR-Read"],
+      topic: "salaries" },
+    { id: "DOC-3", src: "SP", title: "Strategy deck — merger Q4",
+      sourceAcl: ["Alice", "Bob", "Eng-All"], indexAcl: ["Alice", "Bob", "Eng-All"],
+      // when revoked toggle is ON, Bob is removed from source — index stays as-is.
+      revokedSourceAcl: ["Alice", "Eng-All"],
+      revokedTarget: "Bob",
+      topic: "roadmap" },
+    { id: "DOC-4", src: "CF", title: "Salary review notes",
+      sourceAcl: ["Alice", "HR-Read"], indexAcl: ["Alice", "HR-Read"],
+      topic: "salaries" },
+    { id: "DOC-5", src: "JR", title: "INC-4471 prod outage post-mortem",
+      sourceAcl: ["Alice", "Bob", "SRE"], indexAcl: ["Alice", "Bob", "SRE"],
+      topic: "roadmap" }
+  ];
+
+  var QUERIES = {
+    salaries: { label: '"salaries?"', topic: "salaries" },
+    roadmap:  { label: '"Q3 roadmap?"', topic: "roadmap" }
+  };
+
+  var SCN = {
+    flat: {
+      label: "Flat ingest",
+      blurb: "One shared crawler credential ingested everything. <b>No per-doc ACL</b> on the chunks. Reach the bot, reach the corpus."
+    },
+    frozen: {
+      label: "ACL at index time",
+      blurb: "Per-doc ACL field, trimmed at query time. <b>Correct today.</b> Frozen at ingest, never re-syncs with the origin."
+    },
+    live: {
+      label: "Live re-check per hit",
+      blurb: "Trim against the <b>origin system</b> on every hit. Correct — and brutal: an extra round-trip per chunk, against the APIs that already rate-limit you."
+    }
+  };
+
+  function canRead(acl) {
+    // Bob can read if his name or one of his groups is in the ACL list.
+    if (acl.indexOf("Bob") !== -1) return true;
+    for (var i = 0; i < BOB_GROUPS.length; i++) {
+      if (acl.indexOf(BOB_GROUPS[i]) !== -1) return true;
+    }
+    return false;
+  }
+
+  function effectiveSourceAcl(doc, revoked) {
+    if (revoked && doc.revokedSourceAcl) return doc.revokedSourceAcl;
+    return doc.sourceAcl;
+  }
+
+  // Per scenario, given a query and the revoke toggle, return the list of docs the bot returns to Bob
+  // along with each doc's "leak status" classification.
+  function botReturns(scn, queryKey, revoked) {
+    var q = QUERIES[queryKey];
+    if (!q) return [];
+    var hits = DOCS.filter(function (d) { return d.topic === q.topic; });
+
+    if (scn === "flat") {
+      // Returns everything matching the topic, ACL ignored.
+      return hits.map(function (d) {
+        var srcAcl = effectiveSourceAcl(d, revoked);
+        var bobAtSource = canRead(srcAcl);
+        return {
+          doc: d,
+          status: bobAtSource ? "ok" : "leak",
+          reason: bobAtSource
+            ? "Bob can read this at source &mdash; returned, ACL never checked."
+            : "Bob has <b>no access at source</b>. ACL stripped at ingest."
+        };
+      });
+    }
+
+    if (scn === "frozen") {
+      // Returns docs whose FROZEN index ACL admits Bob (regardless of current source).
+      return hits
+        .filter(function (d) { return canRead(d.indexAcl); })
+        .map(function (d) {
+          var srcAcl = effectiveSourceAcl(d, revoked);
+          var bobAtSource = canRead(srcAcl);
+          if (bobAtSource) {
+            return { doc: d, status: "ok", reason: "Index ACL and source agree. Bob reads it." };
+          }
+          // Frozen ACL admits Bob, source has revoked him.
+          return {
+            doc: d, status: "leak",
+            reason: "Revoked at source <b>yesterday</b> &mdash; still in the index. Frozen snapshot leaks it."
+          };
+        });
+    }
+
+    // live: re-check the CURRENT source ACL on every hit.
+    return hits
+      .filter(function (d) { return canRead(effectiveSourceAcl(d, revoked)); })
+      .map(function (d) {
+        return { doc: d, status: "ok", reason: "Origin re-checked. Bob is on the current ACL." };
+      });
+  }
+
+  function roundTrips(scn, queryKey) {
+    if (scn !== "live") return 0;
+    var q = QUERIES[queryKey];
+    if (!q) return 0;
+    return DOCS.filter(function (d) { return d.topic === q.topic; }).length;
+  }
+
+  function verdict(scn, queryKey, revoked) {
+    // Pill 1: "Bob cannot read what he can't open at source?"  (want: yes/white)
+    // Pill 2: "DSAR/Purview can enumerate this corpus?"        (want: yes/white)
+    var returned = botReturns(scn, queryKey, revoked);
+    var anyLeak = returned.some(function (r) { return r.status === "leak"; });
+
+    if (scn === "flat") {
+      return {
+        read: false, dsar: false,
+        note: "Every chunk Alice ever ingested is reachable through the bot. Share the URL and you have shared the corpus. " +
+              "And the index is a <b>shadow copy</b> your privacy office can&rsquo;t reach: Purview eDiscovery and Priva reach " +
+              "Exchange, SharePoint, OneDrive, Teams &mdash; not an <code>Azure AI Search</code> index."
+      };
+    }
+    if (scn === "frozen") {
+      // The "read" pill is conditional on the demonstration: if revoked AND a leaky query is run, it's no.
+      // Default narrative: frozen leaks under revocation; we mark the pill no whenever the toggle is on.
+      // (Without the toggle, frozen is currently honest — but the verdict is the design property, not today's luck.)
+      return {
+        read: !revoked, dsar: false,
+        note: revoked
+          ? "Source ACL changed yesterday. Index didn&rsquo;t. <b>Frozen snapshot is now wrong</b> &mdash; and there is no convenient hook " +
+            "to re-sync ACLs on every doc the corpus has ever seen. Compliance reach unchanged: still no Purview, still no Priva."
+          : "Trims correctly <b>today</b>. The day someone loses access at source, the index keeps handing it to them. " +
+            "Compliance reach unchanged: still no Purview, still no Priva."
+      };
+    }
+    // live
+    return {
+      read: true, dsar: false,
+      note: "Read-side is honest &mdash; at the cost of an extra origin call per hit, against APIs that already <b>rate-limit you</b>. " +
+            "The index is still invisible to Purview and Priva: one chunk of PII in there is personal data your DSAR and " +
+            "legal-hold workflows cannot enumerate, redact, or produce."
+    };
+  }
+
+  function init(root) {
+    var state = { scn: "flat", q: null, revoked: false };
+
+    var els = {
+      tabs: root.querySelectorAll(".rag-tab"),
+      blurb: root.querySelector("[data-blurb]"),
+      qBtns: root.querySelectorAll(".rag-q"),
+      revoke: root.querySelector("[data-revoke]"),
+      corpus: root.querySelector("[data-corpus]"),
+      response: root.querySelector("[data-response]"),
+      meter: root.querySelector("[data-meter]"),
+      pillRead: root.querySelector("[data-pill-read]"),
+      pillDsar: root.querySelector("[data-pill-dsar]"),
+      read: root.querySelector("[data-read]"),
+      dsar: root.querySelector("[data-dsar]"),
+      vnote: root.querySelector("[data-vnote]")
+    };
+
+    function renderCorpus() {
+      els.corpus.innerHTML = "";
+      DOCS.forEach(function (d) {
+        var srcAcl = effectiveSourceAcl(d, state.revoked);
+        var aclHtml = srcAcl.map(function (name) {
+          return "<b>" + name + "</b>";
+        }).join(", ");
+        var revokedClass = "";
+        var revokedNoteHtml = "";
+        if (state.revoked && d.revokedTarget && d.revokedSourceAcl) {
+          revokedClass = " revoked";
+          // Show the revoked name struck through, after the live ACL
+          revokedNoteHtml = " &middot; <b class=\"revoked-name\">" + d.revokedTarget + "</b>";
+        }
+        var div = document.createElement("div");
+        div.className = "rag-doc" + revokedClass;
+        div.setAttribute("data-doc-id", d.id);
+        div.innerHTML =
+          '<div class="rag-doc-row1">' +
+            '<span class="rag-doc-badge">' + d.src + '</span>' +
+            '<span class="rag-doc-id">' + d.id + '</span>' +
+          '</div>' +
+          '<div class="rag-doc-title">' + d.title + '</div>' +
+          '<div class="rag-doc-acl">source ACL: ' + aclHtml + revokedNoteHtml + '</div>';
+        els.corpus.appendChild(div);
+      });
+    }
+
+    function renderResponse() {
+      // clear and rebuild
+      els.response.innerHTML = "";
+      // also clear corpus highlights
+      var docEls = els.corpus.querySelectorAll(".rag-doc");
+      docEls.forEach(function (el) { el.classList.remove("hit", "miss"); });
+
+      if (!state.q) {
+        var empty = document.createElement("div");
+        empty.className = "rag-empty";
+        empty.textContent = "Pick a query above.";
+        els.response.appendChild(empty);
+        els.meter.innerHTML = "";
+        renderVerdict();
+        return;
+      }
+
+      var returned = botReturns(state.scn, state.q, state.revoked);
+      var returnedIds = {};
+      returned.forEach(function (r) { returnedIds[r.doc.id] = true; });
+
+      // mark corpus
+      docEls.forEach(function (el) {
+        var id = el.getAttribute("data-doc-id");
+        if (returnedIds[id]) el.classList.add("hit");
+        else el.classList.add("miss");
+      });
+
+      if (returned.length === 0) {
+        var none = document.createElement("div");
+        none.className = "rag-empty";
+        none.innerHTML = "No hits returned to Bob &mdash; ACL trimmed everything for this query.";
+        els.response.appendChild(none);
+      } else {
+        returned.forEach(function (r, i) {
+          var div = document.createElement("div");
+          div.className = "rag-hit " + (r.status === "leak" ? "leak" : "ok");
+          var overlayClass = r.status === "leak" ? "bad" : "good";
+          div.innerHTML =
+            '<div class="rag-hit-row1">' +
+              '<span class="rag-doc-badge">' + r.doc.src + '</span>' +
+              '<span class="rag-doc-id">' + r.doc.id + '</span>' +
+            '</div>' +
+            '<div class="rag-hit-title">' + r.doc.title + '</div>' +
+            '<div class="rag-hit-overlay ' + overlayClass + '">' +
+              (r.status === "leak" ? "&#9888; LEAK &middot; " : "OK &middot; ") + r.reason +
+            '</div>';
+          els.response.appendChild(div);
+          // staggered reveal
+          setTimeout(function () { div.classList.add("show"); }, 30 + i * 90);
+        });
+      }
+
+      // meter
+      var rt = roundTrips(state.scn, state.q);
+      if (state.scn === "live") {
+        els.meter.innerHTML =
+          "API round-trips this query: <b>" + rt + "</b> &nbsp;&middot;&nbsp; " +
+          '<span class="rag-meter-warn">and the SaaS already rate-limits you.</span>';
+      } else if (state.scn === "frozen") {
+        els.meter.innerHTML = "API round-trips this query: <b>0</b> &nbsp;&middot;&nbsp; ACL field carried in the index.";
+      } else {
+        els.meter.innerHTML = "API round-trips this query: <b>0</b> &nbsp;&middot;&nbsp; ACL never consulted.";
+      }
+
+      renderVerdict();
+    }
+
+    function renderVerdict() {
+      var v = verdict(state.scn, state.q, state.revoked);
+      els.read.textContent = v.read ? "yes" : "no";
+      els.dsar.textContent = v.dsar ? "yes" : "no";
+      els.pillRead.className = "rag-pill " + (v.read ? "yes" : "no");
+      els.pillDsar.className = "rag-pill " + (v.dsar ? "yes" : "no");
+      els.vnote.innerHTML = v.note;
+    }
+
+    function setScenario(name) {
+      state.scn = name;
+      els.tabs.forEach(function (t) {
+        var sel = t.getAttribute("data-scn") === name;
+        t.setAttribute("aria-selected", sel ? "true" : "false");
+      });
+      els.blurb.innerHTML = SCN[name].blurb;
+      renderResponse();
+    }
+
+    function setQuery(q) {
+      state.q = q;
+      els.qBtns.forEach(function (b) {
+        b.classList.toggle("on", b.getAttribute("data-q") === q);
+      });
+      renderResponse();
+    }
+
+    function setRevoked(v) {
+      state.revoked = !!v;
+      renderCorpus();
+      renderResponse();
+    }
+
+    els.tabs.forEach(function (t) {
+      t.addEventListener("click", function () { setScenario(t.getAttribute("data-scn")); });
+    });
+    els.qBtns.forEach(function (b) {
+      b.addEventListener("click", function () { setQuery(b.getAttribute("data-q")); });
+    });
+    els.revoke.addEventListener("change", function () { setRevoked(els.revoke.checked); });
+
+    // initial
+    renderCorpus();
+    setScenario("flat");
+  }
+
+  var roots = document.querySelectorAll("[data-ragacl]");
+  roots.forEach(init);
+})();
+</script>

@@ -1,0 +1,353 @@
+<!-- Interactive Kerberos delegation widget: simple bind vs. S4U2Self/S4U2Proxy. Self-contained, no deps. -->
+<div class="krb" data-krb>
+  <div class="krb-head">
+    <div class="krb-title">Down to the metal. What survives the bind?</div>
+    <div class="krb-sub">Step a request from the web tier to Active Directory. Watch the principal collapse — or not.</div>
+  </div>
+
+  <div class="krb-tabs" role="tablist" aria-label="Scenario">
+    <button class="krb-tab" data-scn="bind" role="tab">Service account &middot; simple bind</button>
+    <button class="krb-tab" data-scn="s4u" role="tab">S4U2Self &rarr; S4U2Proxy &rarr; SASL/GSSAPI</button>
+  </div>
+
+  <div class="krb-blurb" data-blurb></div>
+
+  <div class="krb-grid">
+    <div class="krb-col">
+      <div class="krb-colhead">The hops</div>
+      <ol class="krb-trace" data-trace></ol>
+    </div>
+    <div class="krb-col">
+      <div class="krb-colhead">What the logs record</div>
+      <div class="krb-logs" data-logs></div>
+    </div>
+  </div>
+
+  <div class="krb-controls">
+    <button class="krb-btn" data-prev aria-label="Previous hop">&larr; Step back</button>
+    <button class="krb-btn krb-btn-key" data-next aria-label="Next hop">Step &rarr;</button>
+    <button class="krb-btn" data-play aria-label="Play through all hops">Play</button>
+    <button class="krb-btn" data-reset aria-label="Reset to first hop">Reset</button>
+    <span class="krb-progress" data-progress></span>
+  </div>
+
+  <div class="krb-verdict" data-verdict>
+    <div class="krb-verdict-q">From the AD security log alone, can you prove&hellip;</div>
+    <div class="krb-verdict-pills">
+      <span class="krb-pill" data-pill-whose><b>Whose</b> authority? <i data-whose>&mdash;</i></span>
+      <span class="krb-pill" data-pill-which><b>Which</b> agent? <i data-which>&mdash;</i></span>
+    </div>
+    <div class="krb-verdict-note" data-vnote></div>
+  </div>
+</div>
+
+<style>
+.krb {
+  --ink: #0c0c0d;
+  --panel: #151517;
+  --line: #2a2a2e;
+  --paper: #e9e6df;
+  --muted: #8d8d8a;
+  --rust: #c25a2e;
+  --rust-dim: #6b3a26;
+  color: var(--paper);
+  background: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1.1rem 1.1rem 1.25rem;
+  margin: 2rem 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.krb * { box-sizing: border-box; }
+.krb-title { font-weight: 700; font-size: 1.05rem; letter-spacing: 0.01em; }
+.krb-sub { color: var(--muted); font-size: 0.85rem; margin-top: 0.2rem; }
+.krb-tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.9rem 0 0.6rem; }
+.krb-tab {
+  background: transparent; color: var(--muted);
+  border: 1px solid var(--line); border-radius: 999px;
+  padding: 0.34rem 0.8rem; font-size: 0.82rem; cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.krb-tab:hover { color: var(--paper); }
+.krb-tab[aria-selected="true"] {
+  color: var(--ink); background: var(--paper); border-color: var(--paper); font-weight: 600;
+}
+.krb-blurb { color: var(--paper); font-size: 0.9rem; min-height: 1.4em; margin-bottom: 0.9rem; }
+.krb-blurb b { color: var(--rust); }
+.krb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+@media (max-width: 640px) { .krb-grid { grid-template-columns: 1fr; } }
+.krb-col { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 0.7rem 0.8rem; }
+.krb-colhead {
+  font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--muted); margin-bottom: 0.6rem;
+}
+.krb-trace { list-style: none; margin: 0; padding: 0; }
+.krb-hop {
+  position: relative; padding: 0.5rem 0 0.5rem 1.4rem;
+  border-left: 2px solid var(--line); opacity: 0.32;
+  transition: opacity .25s;
+}
+.krb-hop::before {
+  content: ""; position: absolute; left: -7px; top: 0.78rem;
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--ink); border: 2px solid var(--line);
+}
+.krb-hop.on { opacity: 1; }
+.krb-hop.on::before { border-color: var(--rust); background: var(--rust); }
+.krb-hop.done { opacity: 0.7; }
+.krb-hop.done::before { border-color: var(--paper); }
+.krb-hop:last-child { border-left-color: transparent; }
+.krb-hop-actor { font-weight: 600; font-size: 0.9rem; }
+.krb-hop-via { color: var(--muted); font-size: 0.78rem; }
+.krb-hop-via b { color: var(--rust); font-weight: 600; }
+.krb-claims { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
+.krb-claim {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem; padding: 0.12rem 0.4rem; border-radius: 4px;
+  background: #1d1d20; border: 1px solid var(--line); color: var(--paper);
+  white-space: nowrap;
+}
+.krb-claim.lost { color: var(--rust); border-color: var(--rust-dim); text-decoration: line-through; text-decoration-color: var(--rust); }
+.krb-hop-note { color: var(--muted); font-size: 0.78rem; margin-top: 0.35rem; max-width: 44ch; }
+.krb-hop:not(.on) .krb-hop-note, .krb-hop:not(.on) .krb-claims { display: none; }
+
+.krb-logs { display: flex; flex-direction: column; gap: 0.55rem; min-height: 6rem; }
+.krb-log {
+  border: 1px solid var(--line); border-radius: 6px; padding: 0.45rem 0.55rem;
+  background: #131316; opacity: 0; transform: translateY(4px); transition: opacity .25s, transform .25s;
+}
+.krb-log.show { opacity: 1; transform: none; }
+.krb-log-src { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+.krb-log-line { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.78rem; margin-top: 0.15rem; }
+.krb-log.lost { border-color: var(--rust-dim); }
+.krb-log-miss { color: var(--rust); font-size: 0.75rem; margin-top: 0.2rem; }
+.krb-log-miss b { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+.krb-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; margin-top: 0.9rem; }
+.krb-btn {
+  background: transparent; color: var(--paper); border: 1px solid var(--line);
+  border-radius: 6px; padding: 0.36rem 0.7rem; font-size: 0.82rem; cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.krb-btn:hover { border-color: var(--paper); }
+.krb-btn:disabled { opacity: 0.35; cursor: default; }
+.krb-btn-key { background: var(--rust); border-color: var(--rust); color: #fff; font-weight: 600; }
+.krb-btn-key:hover { border-color: #fff; }
+.krb-progress { color: var(--muted); font-size: 0.8rem; margin-left: auto; }
+
+.krb-verdict { margin-top: 1rem; padding-top: 0.9rem; border-top: 1px solid var(--line); }
+.krb-verdict-q { font-size: 0.85rem; color: var(--muted); }
+.krb-verdict-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0; }
+.krb-pill {
+  border: 1px solid var(--line); border-radius: 999px; padding: 0.3rem 0.75rem; font-size: 0.85rem;
+}
+.krb-pill i { font-style: normal; font-weight: 700; margin-left: 0.25rem; }
+.krb-pill.yes { border-color: var(--paper); }
+.krb-pill.yes i { color: var(--paper); }
+.krb-pill.no { border-color: var(--rust); }
+.krb-pill.no i { color: var(--rust); }
+.krb-verdict-note { font-size: 0.88rem; min-height: 1.3em; }
+.krb-verdict-note b { color: var(--rust); }
+@media (prefers-reduced-motion: reduce) {
+  .krb-hop, .krb-log { transition: none; }
+}
+</style>
+
+<script>
+(function () {
+  var SCN = {
+    bind: {
+      label: "Simple bind",
+      blurb: "The lazy version. One <b>bind DN</b>, one password, broad rights. Every action attributes to the same account forever.",
+      hops: [
+        { actor: "Alice (user)", via: "OIDC sign-in &rarr; <b>web tier</b>",
+          claims: [["oid", "alice", 0], ["tid", "contoso.onmicrosoft", 0]],
+          note: "Front-door sign-in at the web app. No AD principal yet." },
+        { actor: "Web app", via: "<b>OBO</b> &rarr; middle-tier service",
+          claims: [["sub", "oid: alice", 0], ["azp", "web-app", 0], ["scp", "Records.Read", 0]],
+          note: "User preserved into the middle tier as an Entra subject." },
+        { actor: "Middle-tier service", via: "<b>LDAP simple bind</b> &rarr; AD",
+          claims: [["bindDN", "CN=svc-app,OU=svc,DC=corp", 0], ["password", "shared", 0], ["oid", "alice", 1], ["agent", "—", 1]],
+          note: "User and agent both drop here. The bind is a username and a password. AD never sees Alice." },
+        { actor: "Active Directory", via: "authorize as <b>svc-app</b>",
+          claims: [["principal", "svc-app", 0], ["rights", "Domain-wide read/write", 0], ["onBehalfOf", "—", 1]],
+          note: "Every read, every write — the directory attributes to one account. Forever." }
+      ],
+      logs: [
+        { src: "Entra sign-in", line: "alice &rarr; web-app  09:14:02", lost: 0 },
+        { src: "Middle-tier", line: "OBO ok: sub=alice", lost: 0 },
+        { src: "AD security (4624)", line: "logon: svc-app  type=8  09:14:07", lost: 1, miss: "onBehalfOf: —  (no user, no agent — just the bind DN)" },
+        { src: "AD security (4662)", line: "object access: svc-app  rights=*", lost: 1, miss: "actor: —  (every action is the same account)" }
+      ],
+      whose: 0, which: 0,
+      note: "The principal collapses to one identity that is <b>neither the user nor the agent</b>. Authoritative AD logs cannot reconstruct either."
+    },
+    s4u: {
+      label: "S4U constrained delegation",
+      blurb: "The honest version. The KDC mints tickets <b>as the user</b>, to a <b>named SPN</b>, with <b>no user password</b>. The user survives. The agent does not.",
+      hops: [
+        { actor: "Alice (user)", via: "OIDC sign-in &rarr; <b>web tier</b>",
+          claims: [["oid", "alice@contoso", 0], ["tid", "contoso.onmicrosoft", 0]],
+          note: "Web-tier sign-in. No Kerberos yet — the KDC does not accept Entra tokens." },
+        { actor: "Web app", via: "<b>OBO</b> &rarr; middle-tier service",
+          claims: [["sub", "oid: alice", 0], ["azp", "web-app", 0]],
+          note: "User-bound exchange into the middle tier. Now the join begins." },
+        { actor: "Middle-tier service", via: "<b>S4U2Self</b> &rarr; KDC",
+          claims: [["impersonator", "svc-middle$", 0], ["target", "ALICE@CORP", 0], ["password", "none", 0], ["agent", "—", 1]],
+          note: "The service asks the KDC for a ticket to itself, on behalf of a named AD user. No user password involved. Requires UPN alignment via Entra Connect." },
+        { actor: "Middle-tier service", via: "<b>S4U2Proxy</b> &rarr; KDC (allow-list)",
+          claims: [["client", "ALICE@CORP", 0], ["targetSPN", "ldap/dc01.corp", 0], ["delegationTo", "specific SPN only", 0], ["agent", "—", 1]],
+          note: "KDC mints a delegated ticket to <b>one</b> backend SPN that the service has been explicitly allowed to reach. Not unconstrained." },
+        { actor: "Middle-tier service", via: "<b>SASL/GSSAPI</b> bind &rarr; AD",
+          claims: [["bind", "GSSAPI", 0], ["principal", "ALICE@CORP", 0], ["via", "svc-middle$", 0], ["agent", "—", 1]],
+          note: "No password on the wire. The directory sees Alice, delegated through the named service." },
+        { actor: "Active Directory", via: "authorize <b>as Alice</b>",
+          claims: [["principal", "ALICE@CORP", 0], ["delegatedBy", "svc-middle$", 0], ["agent", "—", 1]],
+          note: "User half preserved all the way down. Agent half: still missing — Kerberos carries user + delegating service, not the platform agent above it." }
+      ],
+      logs: [
+        { src: "Entra sign-in", line: "alice &rarr; web-app  09:14:02", lost: 0 },
+        { src: "Middle-tier", line: "OBO ok: sub=alice", lost: 0 },
+        { src: "KDC (4769)", line: "S4U2Self  client=ALICE@CORP  by=svc-middle$", lost: 0 },
+        { src: "KDC (4769)", line: "S4U2Proxy  client=ALICE@CORP  spn=ldap/dc01.corp", lost: 0 },
+        { src: "AD security (4624)", line: "logon: ALICE@CORP  type=3  via=svc-middle$  09:14:11", lost: 1, miss: "agent: —  (Kerberos names the delegating service, not agent X above it)" }
+      ],
+      whose: 1, which: 0,
+      note: "User half: proven, end-to-end. Agent half: still missing — and the whole chain depends on the <b>Entra&harr;AD principal join</b> (UPN alignment via Entra Connect), which is the brittle part nobody puts on the slide."
+    }
+  };
+
+  var ORDER = ["bind", "s4u"];
+
+  function init(root) {
+    var state = { scn: "bind", step: 0, timer: null };
+    var els = {
+      tabs: root.querySelectorAll(".krb-tab"),
+      blurb: root.querySelector("[data-blurb]"),
+      trace: root.querySelector("[data-trace]"),
+      logs: root.querySelector("[data-logs]"),
+      prev: root.querySelector("[data-prev]"),
+      next: root.querySelector("[data-next]"),
+      play: root.querySelector("[data-play]"),
+      reset: root.querySelector("[data-reset]"),
+      progress: root.querySelector("[data-progress]"),
+      whose: root.querySelector("[data-whose]"),
+      which: root.querySelector("[data-which]"),
+      pillWhose: root.querySelector("[data-pill-whose]"),
+      pillWhich: root.querySelector("[data-pill-which]"),
+      vnote: root.querySelector("[data-vnote]")
+    };
+
+    function buildTrace() {
+      var s = SCN[state.scn];
+      els.trace.innerHTML = "";
+      s.hops.forEach(function (h) {
+        var li = document.createElement("li");
+        li.className = "krb-hop";
+        var chips = h.claims.map(function (c) {
+          return '<span class="krb-claim' + (c[2] ? " lost" : "") + '">' + c[0] + ": " + c[1] + "</span>";
+        }).join("");
+        li.innerHTML =
+          '<div class="krb-hop-actor">' + h.actor + "</div>" +
+          '<div class="krb-hop-via">' + h.via + "</div>" +
+          '<div class="krb-claims">' + chips + "</div>" +
+          '<div class="krb-hop-note">' + h.note + "</div>";
+        els.trace.appendChild(li);
+      });
+    }
+
+    function buildLogs() {
+      var s = SCN[state.scn];
+      els.logs.innerHTML = "";
+      s.logs.forEach(function (lg) {
+        var d = document.createElement("div");
+        d.className = "krb-log" + (lg.lost ? " lost" : "");
+        d.innerHTML =
+          '<div class="krb-log-src">' + lg.src + "</div>" +
+          '<div class="krb-log-line">' + lg.line + "</div>" +
+          (lg.miss ? '<div class="krb-log-miss">missing &mdash; <b>' + lg.miss + "</b></div>" : "");
+        els.logs.appendChild(d);
+      });
+    }
+
+    function render() {
+      var s = SCN[state.scn];
+      els.blurb.innerHTML = s.blurb;
+      var hops = els.trace.querySelectorAll(".krb-hop");
+      hops.forEach(function (li, i) {
+        li.classList.toggle("on", i === state.step);
+        li.classList.toggle("done", i < state.step);
+      });
+      var logEls = els.logs.querySelectorAll(".krb-log");
+      var logsForStep = Math.min(state.step, logEls.length - 1);
+      logEls.forEach(function (el, i) { el.classList.toggle("show", i <= logsForStep); });
+      var last = state.step === s.hops.length - 1;
+      els.progress.textContent = "Hop " + (state.step + 1) + " of " + s.hops.length;
+      els.prev.disabled = state.step === 0;
+      els.next.disabled = last;
+      setVerdict(last ? s : null);
+    }
+
+    function setVerdict(s) {
+      if (!s) {
+        els.whose.innerHTML = "&mdash;"; els.which.innerHTML = "&mdash;";
+        els.pillWhose.className = "krb-pill"; els.pillWhich.className = "krb-pill";
+        els.vnote.innerHTML = "";
+        return;
+      }
+      els.whose.textContent = s.whose ? "yes" : "no";
+      els.which.textContent = s.which ? "yes" : "no";
+      els.pillWhose.className = "krb-pill " + (s.whose ? "yes" : "no");
+      els.pillWhich.className = "krb-pill " + (s.which ? "yes" : "no");
+      els.vnote.innerHTML = s.note;
+    }
+
+    function setScenario(name) {
+      stopPlay();
+      state.scn = name; state.step = 0;
+      els.tabs.forEach(function (t) {
+        var sel = t.getAttribute("data-scn") === name;
+        t.setAttribute("aria-selected", sel ? "true" : "false");
+      });
+      buildTrace(); buildLogs(); render();
+    }
+
+    function step(d) {
+      var s = SCN[state.scn];
+      state.step = Math.max(0, Math.min(s.hops.length - 1, state.step + d));
+      render();
+    }
+
+    function stopPlay() {
+      if (state.timer) { clearInterval(state.timer); state.timer = null; els.play.textContent = "Play"; }
+    }
+    function togglePlay() {
+      if (state.timer) { stopPlay(); return; }
+      var s = SCN[state.scn];
+      if (state.step === s.hops.length - 1) state.step = 0;
+      render();
+      els.play.textContent = "Pause";
+      state.timer = setInterval(function () {
+        var sc = SCN[state.scn];
+        if (state.step >= sc.hops.length - 1) { stopPlay(); return; }
+        step(1);
+      }, 1100);
+    }
+
+    els.tabs.forEach(function (t) {
+      t.addEventListener("click", function () { setScenario(t.getAttribute("data-scn")); });
+    });
+    els.prev.addEventListener("click", function () { stopPlay(); step(-1); });
+    els.next.addEventListener("click", function () { stopPlay(); step(1); });
+    els.play.addEventListener("click", togglePlay);
+    els.reset.addEventListener("click", function () { stopPlay(); state.step = 0; render(); });
+
+    setScenario("bind");
+  }
+
+  var roots = document.querySelectorAll("[data-krb]");
+  roots.forEach(init);
+})();
+</script>

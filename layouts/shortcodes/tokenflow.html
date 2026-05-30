@@ -1,0 +1,373 @@
+<!-- Interactive token-flow / log-attribution widget. Self-contained: scoped CSS + vanilla JS, no network, no deps. -->
+<div class="tflow" data-tflow>
+  <div class="tflow-head">
+    <div class="tflow-title">Trace the token. Read the logs. Name the agent.</div>
+    <div class="tflow-sub">Step a request through the hops. Watch what each token carries and what the logs can actually prove.</div>
+  </div>
+
+  <div class="tflow-tabs" role="tablist" aria-label="Scenario">
+    <button class="tflow-tab" data-scn="obo" role="tab">On-Behalf-Of</button>
+    <button class="tflow-tab" data-scn="appperm" role="tab">Application permissions</button>
+    <button class="tflow-tab" data-scn="pat" role="tab">Maker&rsquo;s PAT &middot; prod incident</button>
+  </div>
+
+  <div class="tflow-blurb" data-blurb></div>
+
+  <div class="tflow-grid">
+    <div class="tflow-col">
+      <div class="tflow-colhead">The hops</div>
+      <ol class="tflow-trace" data-trace></ol>
+    </div>
+    <div class="tflow-col">
+      <div class="tflow-colhead">What the logs record</div>
+      <div class="tflow-logs" data-logs></div>
+    </div>
+  </div>
+
+  <div class="tflow-controls">
+    <button class="tflow-btn" data-prev aria-label="Previous hop">&larr; Step back</button>
+    <button class="tflow-btn tflow-btn-key" data-next aria-label="Next hop">Step &rarr;</button>
+    <button class="tflow-btn" data-play>Play</button>
+    <button class="tflow-btn" data-reset>Reset</button>
+    <span class="tflow-progress" data-progress></span>
+  </div>
+
+  <div class="tflow-verdict" data-verdict>
+    <div class="tflow-verdict-q">From the authoritative logs alone, can you prove&hellip;</div>
+    <div class="tflow-verdict-pills">
+      <span class="tflow-pill" data-pill-whose><b>Whose</b> authority? <i data-whose>&mdash;</i></span>
+      <span class="tflow-pill" data-pill-which><b>Which</b> agent? <i data-which>&mdash;</i></span>
+    </div>
+    <div class="tflow-verdict-note" data-vnote></div>
+  </div>
+</div>
+
+<style>
+.tflow {
+  --ink: #0c0c0d;
+  --panel: #151517;
+  --line: #2a2a2e;
+  --paper: #e9e6df;
+  --muted: #8d8d8a;
+  --rust: #c25a2e;
+  --rust-dim: #6b3a26;
+  color: var(--paper);
+  background: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1.1rem 1.1rem 1.25rem;
+  margin: 2rem 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.tflow * { box-sizing: border-box; }
+.tflow-title { font-weight: 700; font-size: 1.05rem; letter-spacing: 0.01em; }
+.tflow-sub { color: var(--muted); font-size: 0.85rem; margin-top: 0.2rem; }
+.tflow-tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.9rem 0 0.6rem; }
+.tflow-tab {
+  background: transparent; color: var(--muted);
+  border: 1px solid var(--line); border-radius: 999px;
+  padding: 0.34rem 0.8rem; font-size: 0.82rem; cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.tflow-tab:hover { color: var(--paper); }
+.tflow-tab[aria-selected="true"] {
+  color: var(--ink); background: var(--paper); border-color: var(--paper); font-weight: 600;
+}
+.tflow-blurb { color: var(--paper); font-size: 0.9rem; min-height: 1.4em; margin-bottom: 0.9rem; }
+.tflow-blurb b { color: var(--rust); }
+.tflow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+@media (max-width: 640px) { .tflow-grid { grid-template-columns: 1fr; } }
+.tflow-col { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 0.7rem 0.8rem; }
+.tflow-colhead {
+  font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--muted); margin-bottom: 0.6rem;
+}
+.tflow-trace { list-style: none; margin: 0; padding: 0; }
+.tflow-hop {
+  position: relative; padding: 0.5rem 0 0.5rem 1.4rem;
+  border-left: 2px solid var(--line); opacity: 0.32;
+  transition: opacity .25s;
+}
+.tflow-hop::before {
+  content: ""; position: absolute; left: -7px; top: 0.78rem;
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--ink); border: 2px solid var(--line);
+}
+.tflow-hop.on { opacity: 1; }
+.tflow-hop.on::before { border-color: var(--rust); background: var(--rust); }
+.tflow-hop.done { opacity: 0.7; }
+.tflow-hop.done::before { border-color: var(--paper); }
+.tflow-hop:last-child { border-left-color: transparent; }
+.tflow-hop-actor { font-weight: 600; font-size: 0.9rem; }
+.tflow-hop-via { color: var(--muted); font-size: 0.78rem; }
+.tflow-hop-via b { color: var(--rust); font-weight: 600; }
+.tflow-claims { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
+.tflow-claim {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem; padding: 0.12rem 0.4rem; border-radius: 4px;
+  background: #1d1d20; border: 1px solid var(--line); color: var(--paper);
+  white-space: nowrap;
+}
+.tflow-claim.lost { color: var(--rust); border-color: var(--rust-dim); text-decoration: line-through; text-decoration-color: var(--rust); }
+.tflow-hop-note { color: var(--muted); font-size: 0.78rem; margin-top: 0.35rem; max-width: 42ch; }
+.tflow-hop:not(.on) .tflow-hop-note, .tflow-hop:not(.on) .tflow-claims { display: none; }
+
+.tflow-logs { display: flex; flex-direction: column; gap: 0.55rem; min-height: 6rem; }
+.tflow-log {
+  border: 1px solid var(--line); border-radius: 6px; padding: 0.45rem 0.55rem;
+  background: #131316; opacity: 0; transform: translateY(4px); transition: opacity .25s, transform .25s;
+}
+.tflow-log.show { opacity: 1; transform: none; }
+.tflow-log-src { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+.tflow-log-line { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.78rem; margin-top: 0.15rem; }
+.tflow-log.lost { border-color: var(--rust-dim); }
+.tflow-log-miss { color: var(--rust); font-size: 0.75rem; margin-top: 0.2rem; }
+.tflow-log-miss b { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.tflow-logs-empty { color: var(--muted); font-size: 0.82rem; font-style: italic; }
+
+.tflow-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; margin-top: 0.9rem; }
+.tflow-btn {
+  background: transparent; color: var(--paper); border: 1px solid var(--line);
+  border-radius: 6px; padding: 0.36rem 0.7rem; font-size: 0.82rem; cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.tflow-btn:hover { border-color: var(--paper); }
+.tflow-btn:disabled { opacity: 0.35; cursor: default; }
+.tflow-btn-key { background: var(--rust); border-color: var(--rust); color: #fff; font-weight: 600; }
+.tflow-btn-key:hover { border-color: #fff; }
+.tflow-progress { color: var(--muted); font-size: 0.8rem; margin-left: auto; }
+
+.tflow-verdict { margin-top: 1rem; padding-top: 0.9rem; border-top: 1px solid var(--line); }
+.tflow-verdict-q { font-size: 0.85rem; color: var(--muted); }
+.tflow-verdict-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0; }
+.tflow-pill {
+  border: 1px solid var(--line); border-radius: 999px; padding: 0.3rem 0.75rem; font-size: 0.85rem;
+}
+.tflow-pill i { font-style: normal; font-weight: 700; margin-left: 0.25rem; }
+.tflow-pill.yes { border-color: var(--paper); }
+.tflow-pill.yes i { color: var(--paper); }
+.tflow-pill.no { border-color: var(--rust); }
+.tflow-pill.no i { color: var(--rust); }
+.tflow-verdict-note { font-size: 0.88rem; min-height: 1.3em; }
+.tflow-verdict-note b { color: var(--rust); }
+@media (prefers-reduced-motion: reduce) {
+  .tflow-hop, .tflow-log { transition: none; }
+}
+</style>
+
+<script>
+(function () {
+  var SCN = {
+    obo: {
+      label: "On-Behalf-Of",
+      blurb: "Honest delegation, done right. The <b>user</b> survives every hop — and the actor chain still does not.",
+      hops: [
+        { actor: "Alice (user)", via: "OIDC sign-in &rarr; <b>Web app</b>",
+          claims: [["sub", "oid: alice", 0], ["aud", "web-app", 0]],
+          note: "Front-door sign-in. EasyAuth proves who signed in — nothing downstream yet." },
+        { actor: "Web app", via: "<b>OBO</b> exchange &rarr; Middle API",
+          claims: [["sub", "oid: alice", 0], ["scp", "Records.Read", 0], ["azp", "web-app", 0], ["act", "none", 1]],
+          note: "New token, audience = Middle API. User preserved as oid+tid. No actor claim minted." },
+        { actor: "Middle API agent", via: "<b>OBO</b> again &rarr; Records API",
+          claims: [["sub", "oid: alice", 0], ["scp", "Records.Read", 0], ["azp", "middle-api", 0], ["act", "none", 1]],
+          note: "User still here. The token names only the immediate caller, never the chain behind it." },
+        { actor: "Records API", via: "authorize &amp; act",
+          claims: [["sub", "oid: alice", 0], ["azp", "middle-api", 0], ["act", "none", 1]],
+          note: "Sees Alice and the last app. Not ‘which agent, in which platform, via which tier’." }
+      ],
+      logs: [
+        { src: "Entra sign-in", line: "alice → web-app  13:58:11", lost: 0 },
+        { src: "Middle-tier", line: "token sub=alice azp=web-app", lost: 0 },
+        { src: "Records API audit", line: "read sub=alice azp=middle-api", lost: 1, miss: "actor chain: —  (alice→agentX→platformY→B not recoverable)" }
+      ],
+      whose: 1, which: 0,
+      note: "Best realistic case in a normal Entra estate. You can name the <b>user</b>. You still cannot name the <b>agent</b>."
+    },
+    appperm: {
+      label: "Application permissions",
+      blurb: "One hop quietly switches to a <b>client secret</b>. The user is laundered into the app’s broad grant.",
+      hops: [
+        { actor: "Alice (user)", via: "OIDC sign-in &rarr; <b>Web app</b>",
+          claims: [["sub", "oid: alice", 0]],
+          note: "Same clean start." },
+        { actor: "Web app", via: "<b>OBO</b> &rarr; Middle API",
+          claims: [["sub", "oid: alice", 0], ["scp", "Records.Read", 0], ["azp", "web-app", 0]],
+          note: "Still honest. User preserved." },
+        { actor: "Middle API agent", via: "<b>client-credentials</b> &rarr; Records API",
+          claims: [["sub", "—", 1], ["roles", "Records.ReadWrite.All", 0], ["appid", "middle-api", 0]],
+          note: "App acts as itself. The user is gone at the token endpoint — and the app role is broader than Alice ever held." },
+        { actor: "Records API", via: "authorize",
+          claims: [["sub", "—", 1], ["roles", "Records.ReadWrite.All", 0], ["appid", "middle-api", 0]],
+          note: "Sees a service principal with god-mode. No person. No agent." }
+      ],
+      logs: [
+        { src: "Entra sign-in", line: "alice → web-app  13:58:11", lost: 0 },
+        { src: "Middle-tier", line: "OBO ok: sub=alice", lost: 0 },
+        { src: "Records API audit", line: "write by appid=middle-api roles=*", lost: 1, miss: "sub: —  (no user; shared service principal did it)" }
+      ],
+      whose: 0, which: 0,
+      note: "The user vanished at the app-permissions hop. Every action attributes to one over-privileged <b>service principal</b> shared by everything."
+    },
+    pat: {
+      label: "Maker’s PAT",
+      blurb: "The low-code build everyone actually ships. One <b>admin PAT</b>, and you let it rip. Then prod breaks.",
+      hops: [
+        { actor: "Alice (user)", via: "chat: ‘tidy stale tickets before the release’",
+          claims: [["sub", "oid: alice", 0], ["context", "chat only", 1]],
+          note: "Alice’s identity never leaves the chat surface." },
+        { actor: "Platform agent", via: "runs as <b>maker’s PAT</b>",
+          claims: [["sub", "—", 1], ["cred", "PAT: maker", 0], ["azp", "n/a (Atlassian)", 1]],
+          note: "Different identity domain. Entra-Alice and Atlassian-Alice never reconcile. The agent is the maker now." },
+        { actor: "Jira", via: "bulk-close across projects Alice can’t see",
+          claims: [["author", "maker", 0], ["onBehalfOf", "—", 1]],
+          note: "One closed ticket is the change record an automation rule keys off." },
+        { actor: "Release pipeline", via: "rule fires &rarr; cut prod build",
+          claims: [["trigger", "automation", 0], ["who", "—", 1]],
+          note: "Prod is now running a build nobody signed off on." }
+      ],
+      logs: [
+        { src: "Jira audit", line: "bulk-close author=maker  14:02:07", lost: 1, miss: "onBehalfOf: —  (Alice nowhere in it)" },
+        { src: "Entra sign-in", line: "alice → platform  13:58:11", lost: 1, miss: "no event tied to the change" },
+        { src: "Platform run log", line: "runId=7f3a…  13:59  (never forwarded)", lost: 1, miss: "correlation id not in Jira or pipeline logs" },
+        { src: "Release pipeline", line: "cut by automation  14:02:50", lost: 1, miss: "who: —  clocks skew across all three" }
+      ],
+      whose: 0, which: 0,
+      note: "Reconcile timestamps across three clocks that disagree and you can <b>guess</b>. From the authoritative logs you cannot <b>prove</b> it. Impossible by construction."
+    }
+  };
+
+  var ORDER = ["obo", "appperm", "pat"];
+
+  function init(root) {
+    var state = { scn: "obo", step: 0, timer: null };
+    var els = {
+      tabs: root.querySelectorAll(".tflow-tab"),
+      blurb: root.querySelector("[data-blurb]"),
+      trace: root.querySelector("[data-trace]"),
+      logs: root.querySelector("[data-logs]"),
+      prev: root.querySelector("[data-prev]"),
+      next: root.querySelector("[data-next]"),
+      play: root.querySelector("[data-play]"),
+      reset: root.querySelector("[data-reset]"),
+      progress: root.querySelector("[data-progress]"),
+      whose: root.querySelector("[data-whose]"),
+      which: root.querySelector("[data-which]"),
+      pillWhose: root.querySelector("[data-pill-whose]"),
+      pillWhich: root.querySelector("[data-pill-which]"),
+      vnote: root.querySelector("[data-vnote]")
+    };
+
+    function buildTrace() {
+      var s = SCN[state.scn];
+      els.trace.innerHTML = "";
+      s.hops.forEach(function (h, i) {
+        var li = document.createElement("li");
+        li.className = "tflow-hop";
+        var chips = h.claims.map(function (c) {
+          return '<span class="tflow-claim' + (c[2] ? " lost" : "") + '">' + c[0] + ": " + c[1] + "</span>";
+        }).join("");
+        li.innerHTML =
+          '<div class="tflow-hop-actor">' + h.actor + "</div>" +
+          '<div class="tflow-hop-via">' + h.via + "</div>" +
+          '<div class="tflow-claims">' + chips + "</div>" +
+          '<div class="tflow-hop-note">' + h.note + "</div>";
+        els.trace.appendChild(li);
+      });
+    }
+
+    function render() {
+      var s = SCN[state.scn];
+      els.blurb.innerHTML = s.blurb;
+      var hops = els.trace.querySelectorAll(".tflow-hop");
+      hops.forEach(function (li, i) {
+        li.classList.toggle("on", i === state.step);
+        li.classList.toggle("done", i < state.step);
+      });
+      // logs accumulate one per hop, capped at hop count
+      var logEls = els.logs.querySelectorAll(".tflow-log");
+      logEls.forEach(function (el, i) { el.classList.toggle("show", i <= state.step); });
+      var last = state.step === s.hops.length - 1;
+      els.progress.textContent = "Hop " + (state.step + 1) + " of " + s.hops.length;
+      els.prev.disabled = state.step === 0;
+      els.next.disabled = last;
+      // verdict reveals at final hop
+      setVerdict(last ? s : null);
+    }
+
+    function setVerdict(s) {
+      if (!s) {
+        els.whose.innerHTML = "&mdash;"; els.which.innerHTML = "&mdash;";
+        els.pillWhose.className = "tflow-pill"; els.pillWhich.className = "tflow-pill";
+        els.vnote.innerHTML = "";
+        return;
+      }
+      els.whose.textContent = s.whose ? "yes" : "no";
+      els.which.textContent = s.which ? "yes" : "no";
+      els.pillWhose.className = "tflow-pill " + (s.whose ? "yes" : "no");
+      els.pillWhich.className = "tflow-pill " + (s.which ? "yes" : "no");
+      els.vnote.innerHTML = s.note;
+    }
+
+    function buildLogs() {
+      var s = SCN[state.scn];
+      els.logs.innerHTML = "";
+      s.logs.forEach(function (lg) {
+        var d = document.createElement("div");
+        d.className = "tflow-log" + (lg.lost ? " lost" : "");
+        d.innerHTML =
+          '<div class="tflow-log-src">' + lg.src + "</div>" +
+          '<div class="tflow-log-line">' + lg.line + "</div>" +
+          (lg.miss ? '<div class="tflow-log-miss">missing &mdash; <b>' + lg.miss + "</b></div>" : "");
+        els.logs.appendChild(d);
+      });
+    }
+
+    function setScenario(name) {
+      stopPlay();
+      state.scn = name; state.step = 0;
+      els.tabs.forEach(function (t) {
+        var sel = t.getAttribute("data-scn") === name;
+        t.setAttribute("aria-selected", sel ? "true" : "false");
+      });
+      buildTrace(); buildLogs(); render();
+    }
+
+    function step(d) {
+      var s = SCN[state.scn];
+      state.step = Math.max(0, Math.min(s.hops.length - 1, state.step + d));
+      render();
+    }
+
+    function stopPlay() {
+      if (state.timer) { clearInterval(state.timer); state.timer = null; els.play.textContent = "Play"; }
+    }
+    function togglePlay() {
+      if (state.timer) { stopPlay(); return; }
+      var s = SCN[state.scn];
+      if (state.step === s.hops.length - 1) state.step = 0;
+      render();
+      els.play.textContent = "Pause";
+      state.timer = setInterval(function () {
+        var sc = SCN[state.scn];
+        if (state.step >= sc.hops.length - 1) { stopPlay(); return; }
+        step(1);
+      }, 1100);
+    }
+
+    els.tabs.forEach(function (t) {
+      t.addEventListener("click", function () { setScenario(t.getAttribute("data-scn")); });
+    });
+    els.prev.addEventListener("click", function () { stopPlay(); step(-1); });
+    els.next.addEventListener("click", function () { stopPlay(); step(1); });
+    els.play.addEventListener("click", togglePlay);
+    els.reset.addEventListener("click", function () { stopPlay(); state.step = 0; render(); });
+
+    setScenario("obo");
+  }
+
+  var roots = document.querySelectorAll("[data-tflow]");
+  roots.forEach(init);
+})();
+</script>
