@@ -1,33 +1,45 @@
 {{- $slug := .Page.File.BaseFileName -}}
-{{- $boardroom := printf "/audio/%s-boardroom.mp3" $slug -}}
-{{- $bench := printf "/audio/%s-bench.mp3" $slug -}}
-<aside class="podcast" aria-label="Audio versions of this post">
+{{- $boardEn := printf "/audio/%s-boardroom-en.mp3" $slug -}}
+{{- $benchEn := printf "/audio/%s-bench-en.mp3" $slug -}}
+{{- $boardDe := printf "/audio/%s-boardroom-de.mp3" $slug -}}
+{{- $benchDe := printf "/audio/%s-bench-de.mp3" $slug -}}
+<aside class="podcast" aria-label="Audio versions of this post" data-podcast>
   <div class="podcast-head">
     <div class="podcast-eyebrow">Prefer to listen?</div>
-    <div class="podcast-title">Two cuts, same post</div>
+    <div class="podcast-title">Two cuts, two languages</div>
     <div class="podcast-sub">No bytes load until you press play.</div>
+    <div class="podcast-langs" role="tablist" aria-label="Language">
+      <button class="podcast-lang is-active" role="tab" aria-selected="true" data-lang="en">English</button>
+      <button class="podcast-lang" role="tab" aria-selected="false" data-lang="de">Deutsch</button>
+    </div>
   </div>
   <div class="podcast-grid">
     <div class="podcast-card">
       <div class="podcast-card-head">
         <span class="podcast-card-tag">Governance</span>
-        <span class="podcast-card-len">~12 min</span>
+        <span class="podcast-card-len">~10 min</span>
       </div>
       <div class="podcast-card-title">From the Boardroom</div>
       <p class="podcast-card-blurb">For heads of identity, CISOs, audit and risk. Every collapse translated into the audit-committee question behind it — what does the auditor see, what does the regulator demand, where is the program exposed.</p>
-      <audio class="podcast-audio" controls preload="none" src="{{ $boardroom }}">
-        Your browser doesn&rsquo;t support inline audio. <a href="{{ $boardroom }}">Download the MP3</a>.
+      <audio class="podcast-audio" data-lang="en" controls preload="none" src="{{ $boardEn }}">
+        Your browser doesn&rsquo;t support inline audio. <a href="{{ $boardEn }}">MP3</a>.
+      </audio>
+      <audio class="podcast-audio" data-lang="de" controls preload="none" src="{{ $boardDe }}" hidden>
+        Ihr Browser unterstützt kein eingebettetes Audio. <a href="{{ $boardDe }}">MP3</a>.
       </audio>
     </div>
     <div class="podcast-card">
       <div class="podcast-card-head">
         <span class="podcast-card-tag">Engineering</span>
-        <span class="podcast-card-len">~16 min</span>
+        <span class="podcast-card-len">~12 min</span>
       </div>
       <div class="podcast-card-title">From the Bench</div>
       <p class="podcast-card-blurb">For identity engineers, app developers, identity ops. Lives in the wire — token claims, OBO mechanics, S4U flags, Keycloak mappers, AI Search ACL fields — and ends every section on something you could ship on Monday.</p>
-      <audio class="podcast-audio" controls preload="none" src="{{ $bench }}">
-        Your browser doesn&rsquo;t support inline audio. <a href="{{ $bench }}">Download the MP3</a>.
+      <audio class="podcast-audio" data-lang="en" controls preload="none" src="{{ $benchEn }}">
+        Your browser doesn&rsquo;t support inline audio. <a href="{{ $benchEn }}">MP3</a>.
+      </audio>
+      <audio class="podcast-audio" data-lang="de" controls preload="none" src="{{ $benchDe }}" hidden>
+        Ihr Browser unterstützt kein eingebettetes Audio. <a href="{{ $benchDe }}">MP3</a>.
       </audio>
     </div>
   </div>
@@ -55,6 +67,18 @@
 }
 .podcast-title { font-size: 1rem; font-weight: 600; margin-top: 0.15rem; }
 .podcast-sub { color: var(--p-muted); font-size: 0.74rem; margin-top: 0.15rem; }
+.podcast-langs { display: flex; gap: 0.35rem; margin-top: 0.6rem; }
+.podcast-lang {
+  background: transparent; color: var(--p-muted);
+  border: 1px solid var(--p-line); border-radius: 999px;
+  padding: 0.28rem 0.7rem; font-size: 0.78rem; cursor: pointer;
+  font-family: inherit;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.podcast-lang:hover { color: var(--p-paper); }
+.podcast-lang.is-active {
+  color: var(--p-ink); background: var(--p-paper); border-color: var(--p-paper); font-weight: 600;
+}
 .podcast-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem;
 }
@@ -84,5 +108,33 @@
   display: block; width: 100%; margin-top: auto;
   color-scheme: dark;
 }
+.podcast-audio[hidden] { display: none; }
 .podcast-audio::-webkit-media-controls-panel { background: var(--p-ink); }
 </style>
+<script>
+(function () {
+  document.querySelectorAll("[data-podcast]").forEach(function (root) {
+    var langButtons = root.querySelectorAll(".podcast-lang");
+    var audios = root.querySelectorAll(".podcast-audio");
+    function switchTo(lang) {
+      audios.forEach(function (a) {
+        var match = a.getAttribute("data-lang") === lang;
+        a.hidden = !match;
+        if (!match) {
+          try { a.pause(); } catch (e) {}
+        }
+      });
+      langButtons.forEach(function (b) {
+        var match = b.getAttribute("data-lang") === lang;
+        b.classList.toggle("is-active", match);
+        b.setAttribute("aria-selected", match ? "true" : "false");
+      });
+    }
+    langButtons.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        switchTo(btn.getAttribute("data-lang"));
+      });
+    });
+  });
+})();
+</script>
