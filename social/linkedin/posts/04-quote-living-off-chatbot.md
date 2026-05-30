@@ -14,7 +14,7 @@ Recommended slot: Tuesday week 2 (EN) / Thursday week 2 (DE), 08:30 CET.
 >
 > Full piece in the comments — the relevant section is "Why this hasn't blown up yet".
 >
-> #AgenticAI #Cybersecurity #A2A
+> #AgenticAI #Cybersecurity #A2A #GeneratedByOpus #AI_Generated
 
 **First comment:** https://hupfauer.one/posts/which-agent-bricked-prod/
 
@@ -28,7 +28,7 @@ Recommended slot: Tuesday week 2 (EN) / Thursday week 2 (DE), 08:30 CET.
 >
 > Vollständiges Stück in den Kommentaren — die relevante Stelle heißt "Warum das noch nicht hochgegangen ist".
 >
-> #AgenticAI #Informationssicherheit #A2A
+> #AgenticAI #Informationssicherheit #A2A #GeneratedByOpus #AI_Generated
 
 **Erster Kommentar:** https://hupfauer.one/posts/which-agent-bricked-prod/
 

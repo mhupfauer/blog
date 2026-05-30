@@ -18,7 +18,7 @@ Recommended slot: Tuesday ≈ 08:30 CET (EN) / Thursday ≈ 08:30 CET (DE).
 >
 > Full version below. Wrote it for the people who actually build this, with two audio cuts — a Boardroom cut (~10 min) for governance, a Bench cut (~12 min) for engineering — in English and German.
 >
-> #AgenticAI #IdentityAccessManagement #Cybersecurity
+> #AgenticAI #IdentityAccessManagement #Cybersecurity #GeneratedByOpus #AI_Generated
 
 **First comment:** https://hupfauer.one/posts/which-agent-bricked-prod/
 
@@ -36,6 +36,6 @@ Recommended slot: Tuesday ≈ 08:30 CET (EN) / Thursday ≈ 08:30 CET (DE).
 >
 > Volle Version unten. Geschrieben für die Leute, die das Zeug tatsächlich bauen. Zwei Audio-Cuts: Boardroom-Cut (~10 min) für Governance, Bench-Cut (~12–14 min) für Engineering — auf Englisch und Deutsch.
 >
-> #AgenticAI #IAM #Informationssicherheit
+> #AgenticAI #IAM #Informationssicherheit #GeneratedByOpus #AI_Generated
 
 **Erster Kommentar:** https://hupfauer.one/posts/which-agent-bricked-prod/

@@ -45,7 +45,7 @@ CONFIG_DIR = Path.home() / ".config" / "linkedin-poster"
 APP_CONFIG = CONFIG_DIR / "app.json"
 TOKEN_FILE = CONFIG_DIR / "token.json"
 
-LI_VERSION = "202405"
+LI_VERSION = "202605"
 LI_REST = "https://api.linkedin.com/rest"
 LI_OAUTH = "https://www.linkedin.com/oauth/v2"
 SCOPES = "openid profile w_member_social"
@@ -220,6 +220,10 @@ def parse_post_md(md_path: Path, lang: str) -> tuple[str, Optional[str]]:
     body = "\n".join(bq_lines).rstrip()
     # collapse leading/trailing blank lines and 3+ consecutive blanks
     body = re.sub(r"\n{3,}", "\n\n", body).strip()
+    # LinkedIn renders markdown literally — strip *emphasis* and _emphasis_ so
+    # the asterisks/underscores don't show up as typographic noise in the feed.
+    body = re.sub(r"(?<!\w)\*([^\s*][^*]*?[^\s*]|\S)\*(?!\w)", r"\1", body)
+    body = re.sub(r"(?<!\w)_([^\s_][^_]*?[^\s_]|\S)_(?!\w)", r"\1", body)
 
     label = LANG_COMMENT_LABEL[lang]
     cm = re.search(rf"\*\*{re.escape(label)}:\*\*\s*(\S+)", section)
@@ -230,6 +234,14 @@ def parse_post_md(md_path: Path, lang: str) -> tuple[str, Optional[str]]:
 # ------------------------------------------------------------- uploads ---
 IMG_EXT = {".png", ".jpg", ".jpeg", ".gif"}
 VID_EXT = {".mp4", ".mov"}
+
+
+def _img_mime(path: Path) -> str:
+    ext = path.suffix.lower()
+    return {
+        ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+        ".png": "image/png",  ".gif": "image/gif",
+    }.get(ext, "application/octet-stream")
 
 
 def upload_image(token: str, person_urn: str, path: Path) -> str:
@@ -246,12 +258,16 @@ def upload_image(token: str, person_urn: str, path: Path) -> str:
     upload_url = init["value"]["uploadUrl"]
     image_urn = init["value"]["image"]
     binary = path.read_bytes()
-    req = urllib.request.Request(upload_url, data=binary, method="PUT")
+    req = urllib.request.Request(
+        upload_url, data=binary, method="PUT",
+        headers={"Content-Type": _img_mime(path)},
+    )
     try:
         with urllib.request.urlopen(req) as r:
             r.read()
     except urllib.error.HTTPError as e:
-        die(f"image PUT failed: HTTP {e.code} {e.reason}\n{e.read().decode(errors='replace')}")
+        body = e.read().decode(errors="replace")
+        die(f"image PUT failed: HTTP {e.code} {e.reason}\n{body[:400]}")
     return image_urn
 
 

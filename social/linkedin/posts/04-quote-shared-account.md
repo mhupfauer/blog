@@ -12,7 +12,7 @@ Recommended slot: Thursday week 1 (EN) / following Tuesday (DE), 08:30 CET.
 >
 > Full essay on what that looks like across Entra, Kerberos, RAG and the shop floor in the comments.
 >
-> #AgenticAI #IdentityAccessManagement #Cybersecurity
+> #AgenticAI #IdentityAccessManagement #Cybersecurity #GeneratedByOpus #AI_Generated
 
 **First comment:** https://hupfauer.one/posts/which-agent-bricked-prod/
 
@@ -24,7 +24,7 @@ Recommended slot: Thursday week 1 (EN) / following Tuesday (DE), 08:30 CET.
 >
 > Volle Essay zu dem, was das quer durch Entra, Kerberos, RAG und Werkshalle bedeutet, in den Kommentaren.
 >
-> #AgenticAI #IAM #Informationssicherheit
+> #AgenticAI #IAM #Informationssicherheit #GeneratedByOpus #AI_Generated
 
 **Erster Kommentar:** https://hupfauer.one/posts/which-agent-bricked-prod/
 

@@ -14,7 +14,7 @@ Recommended slots: Thursday week 1 (EN), Monday week 2 (DE), 08:30 CET.
 >
 > Boardroom cut (~10 min) and Bench cut (~12 min), EN + DE, in the comments.
 >
-> #AgenticAI #OTSecurity #IdentityAccessManagement
+> #AgenticAI #OTSecurity #IdentityAccessManagement #GeneratedByOpus #AI_Generated
 
 **First comment:** https://hupfauer.one/posts/which-agent-bricked-prod/
 
@@ -26,7 +26,7 @@ Recommended slots: Thursday week 1 (EN), Monday week 2 (DE), 08:30 CET.
 >
 > Boardroom-Cut (~10 min) und Bench-Cut (~14 min), EN + DE, in den Kommentaren.
 >
-> #AgenticAI #OTSecurity #IAM
+> #AgenticAI #OTSecurity #IAM #GeneratedByOpus #AI_Generated
 
 **Erster Kommentar:** https://hupfauer.one/posts/which-agent-bricked-prod/
 

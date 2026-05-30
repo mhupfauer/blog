@@ -14,7 +14,7 @@ Recommended slot: Tuesday week 2 ≈ 08:30 CET.
 >
 > This is the short visual version. Full essay with interactive diagrams and the audio cuts in the comments.
 >
-> #AgenticAI #IdentityAccessManagement #Cybersecurity
+> #AgenticAI #IdentityAccessManagement #Cybersecurity #GeneratedByOpus #AI_Generated
 
 **First comment:** https://hupfauer.one/posts/which-agent-bricked-prod/
 
@@ -28,7 +28,7 @@ Recommended slot: Tuesday week 2 ≈ 08:30 CET.
 >
 > Das ist die kurze visuelle Version. Volle Essay mit interaktiven Diagrammen und Audio-Cuts in den Kommentaren.
 >
-> #AgenticAI #IAM #Informationssicherheit
+> #AgenticAI #IAM #Informationssicherheit #GeneratedByOpus #AI_Generated
 
 **Erster Kommentar:** https://hupfauer.one/posts/which-agent-bricked-prod/
 

@@ -14,7 +14,7 @@ Recommended slot: Thursday week 2 / following Tuesday, 08:30 CET. Post both lang
 >
 > Full piece in the comments. Section: "Down to where the value is actually made".
 >
-> #OTSecurity #AgenticAI #ICS
+> #OTSecurity #AgenticAI #ICS #GeneratedByOpus #AI_Generated
 
 **First comment:** https://hupfauer.one/posts/which-agent-bricked-prod/
 
@@ -28,7 +28,7 @@ Recommended slot: Thursday week 2 / following Tuesday, 08:30 CET. Post both lang
 >
 > Vollständiges Stück in den Kommentaren. Abschnitt: "Dorthin, wo der Wert tatsächlich entsteht".
 >
-> #OTSecurity #AgenticAI #ICS
+> #OTSecurity #AgenticAI #ICS #GeneratedByOpus #AI_Generated
 
 **Erster Kommentar:** https://hupfauer.one/posts/which-agent-bricked-prod/
 
