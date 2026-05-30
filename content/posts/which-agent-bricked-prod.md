@@ -16,6 +16,8 @@ cover:
 
 Every hop an agent makes has to answer two questions: *whose* authority is being exercised, and *which* agent exercised it. Most enterprise agents in production have already lost at least one of them, which means the auditability claim is fiction — and the role model, the permission documentation, and the incident-response plan are fiction along with it. That is the contrarian sentence; the rest of this post is what it looks like in wiring.
 
+{{< podcast >}}
+
 A while back I argued on this site that [identity is the control plane](/posts/identity-is-the-control-plane/): probabilistic recognizers are sensors, and the controls that actually hold are identity scoping, sandboxing, and a human on the irreversible actions. That post made the case in the abstract. This series spends it down in the place where it is genuinely hard — an estate with on-prem Active Directory, Entra ID, and a Keycloak nobody is allowed to turn off — and shows how the principle breaks the moment you stop drawing diagrams and start wiring tokens.
 
 By "which agent" I mean the concrete thing that acted — the deployed workflow, the bot instance, the tool-calling runtime — not the app registration it happens to share with forty others. That distinction is the whole game, because the principal collapses in three different places and each erases a different half: the *user* disappears behind an app-only token or a service account; the *agent* disappears behind a platform-wide client identity; and the *authorization* disappears when data is copied out of the system that knew the ACLs into one that doesn't. The rest of this post is those three collapses, in the order you meet them building the thing.

@@ -1,0 +1,88 @@
+{{- $slug := .Page.File.BaseFileName -}}
+{{- $boardroom := printf "/audio/%s-boardroom.mp3" $slug -}}
+{{- $bench := printf "/audio/%s-bench.mp3" $slug -}}
+<aside class="podcast" aria-label="Audio versions of this post">
+  <div class="podcast-head">
+    <div class="podcast-eyebrow">Prefer to listen?</div>
+    <div class="podcast-title">Two cuts, same post</div>
+    <div class="podcast-sub">No bytes load until you press play.</div>
+  </div>
+  <div class="podcast-grid">
+    <div class="podcast-card">
+      <div class="podcast-card-head">
+        <span class="podcast-card-tag">Governance</span>
+        <span class="podcast-card-len">~12 min</span>
+      </div>
+      <div class="podcast-card-title">From the Boardroom</div>
+      <p class="podcast-card-blurb">For heads of identity, CISOs, audit and risk. Every collapse translated into the audit-committee question behind it — what does the auditor see, what does the regulator demand, where is the program exposed.</p>
+      <audio class="podcast-audio" controls preload="none" src="{{ $boardroom }}">
+        Your browser doesn&rsquo;t support inline audio. <a href="{{ $boardroom }}">Download the MP3</a>.
+      </audio>
+    </div>
+    <div class="podcast-card">
+      <div class="podcast-card-head">
+        <span class="podcast-card-tag">Engineering</span>
+        <span class="podcast-card-len">~16 min</span>
+      </div>
+      <div class="podcast-card-title">From the Bench</div>
+      <p class="podcast-card-blurb">For identity engineers, app developers, identity ops. Lives in the wire — token claims, OBO mechanics, S4U flags, Keycloak mappers, AI Search ACL fields — and ends every section on something you could ship on Monday.</p>
+      <audio class="podcast-audio" controls preload="none" src="{{ $bench }}">
+        Your browser doesn&rsquo;t support inline audio. <a href="{{ $bench }}">Download the MP3</a>.
+      </audio>
+    </div>
+  </div>
+</aside>
+<style>
+.podcast {
+  --p-ink: #0c0c0d;
+  --p-panel: #151517;
+  --p-line: #2a2a2e;
+  --p-paper: #e9e6df;
+  --p-muted: #8d8d8a;
+  --p-rust: #c25a2e;
+  color: var(--p-paper);
+  background: var(--p-ink);
+  border: 1px solid var(--p-line);
+  border-radius: 10px;
+  padding: 1rem 1.05rem 1.1rem;
+  margin: 1.5rem 0 2.2rem;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.podcast-head { margin-bottom: 0.85rem; }
+.podcast-eyebrow {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--p-rust); font-weight: 600;
+}
+.podcast-title { font-size: 1rem; font-weight: 600; margin-top: 0.15rem; }
+.podcast-sub { color: var(--p-muted); font-size: 0.74rem; margin-top: 0.15rem; }
+.podcast-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem;
+}
+@media (max-width: 640px) { .podcast-grid { grid-template-columns: 1fr; } }
+.podcast-card {
+  background: var(--p-panel);
+  border: 1px solid var(--p-line);
+  border-radius: 8px;
+  padding: 0.7rem 0.8rem 0.8rem;
+  display: flex; flex-direction: column;
+}
+.podcast-card-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  font-size: 0.72rem;
+}
+.podcast-card-tag {
+  text-transform: uppercase; letter-spacing: 0.12em; color: var(--p-rust);
+  font-weight: 600;
+}
+.podcast-card-len { color: var(--p-muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.podcast-card-title { font-size: 0.98rem; font-weight: 600; margin-top: 0.25rem; }
+.podcast-card-blurb {
+  color: var(--p-paper); font-size: 0.82rem; line-height: 1.45;
+  margin: 0.4rem 0 0.65rem; opacity: 0.86;
+}
+.podcast-audio {
+  display: block; width: 100%; margin-top: auto;
+  color-scheme: dark;
+}
+.podcast-audio::-webkit-media-controls-panel { background: var(--p-ink); }
+</style>

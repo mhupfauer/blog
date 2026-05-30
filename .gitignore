@@ -5,3 +5,6 @@ resources/
 
 # Local scripts with hardcoded credentials — never commit
 scripts/
+
+# Generated podcast scripts (kept locally for re-renders, not shipped)
+static/audio/*.script.txt
