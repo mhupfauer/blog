@@ -1,5 +1,6 @@
 ---
 title: "Salting your own well: defensive prompt injection as a tripwire"
+slug: "salting-your-own-well"
 date: 2026-05-11
 draft: false
 tags: ["agentic-ai", "security", "prompt-injection", "defense", "refusal"]

@@ -1,5 +1,6 @@
 ---
 title: "Identity is the control plane. Detection is a sensor."
+slug: "identity-is-the-control-plane"
 date: 2026-05-17
 draft: false
 tags: ["agentic-ai", "identity", "security", "prompt-injection"]
