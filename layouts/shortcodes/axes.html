@@ -1,0 +1,172 @@
+<!-- Vertical-vs-horizontal authority diagram. Self-contained: scoped CSS + inline SVG + vanilla JS, no deps. -->
+<div class="axs" data-axs data-step="1">
+  <div class="axs-head">
+    <div class="axs-title">Two axes. The gates are on the wrong one.</div>
+    <div class="axs-sub">Step through what the OS guards, what the agent actually does, and the one gate that fires at the wrong thing.</div>
+  </div>
+
+  <div class="axs-stage">
+    <svg viewBox="0 0 760 430" role="img" aria-label="Diagram: vertical escalation gates versus horizontal ambient reach">
+      <!-- vertical axis: escalation -->
+      <g class="axs-layer" data-when="2">
+        <line class="axs-axis" x1="120" y1="250" x2="120" y2="40"/>
+        <polygon class="axs-arrow" points="120,30 114,46 126,46"/>
+        <text class="axs-axislbl" x="138" y="48">escalation → root / SYSTEM</text>
+        <g class="axs-gate" data-when="2">
+          <rect x="86" y="196" width="68" height="11" rx="2"/>
+          <text class="axs-gtext" x="162" y="205">UAC</text>
+        </g>
+        <g class="axs-gate" data-when="2">
+          <rect x="86" y="146" width="68" height="11" rx="2"/>
+          <text class="axs-gtext" x="162" y="155">sudo</text>
+        </g>
+        <g class="axs-gate" data-when="2">
+          <rect x="86" y="96" width="68" height="11" rx="2"/>
+          <text class="axs-gtext" x="162" y="105">polkit</text>
+        </g>
+        <text class="axs-note axs-note-v" x="120" y="78">these hold</text>
+      </g>
+
+      <!-- principal -->
+      <g class="axs-layer" data-when="1 2 3 4">
+        <circle class="axs-princ" cx="120" cy="250" r="15"/>
+        <text class="axs-princlbl" x="120" y="285">you · signed in</text>
+      </g>
+
+      <!-- horizontal rail: ambient reach -->
+      <g class="axs-layer" data-when="3">
+        <line class="axs-axis" x1="140" y1="250" x2="710" y2="250"/>
+        <polygon class="axs-arrow" points="720,250 704,244 704,256"/>
+        <text class="axs-axislbl" x="430" y="232" text-anchor="middle">ambient reach · already authenticated</text>
+
+        <g class="axs-target" data-when="3">
+          <rect x="196" y="300" width="118" height="34" rx="5"/>
+          <text class="axs-ttext" x="255" y="321">git push --force</text>
+          <line class="axs-stem" x1="255" y1="265" x2="255" y2="300"/>
+        </g>
+        <g class="axs-target" data-when="3">
+          <rect x="330" y="300" width="118" height="34" rx="5"/>
+          <text class="axs-ttext" x="389" y="321">az group delete</text>
+          <line class="axs-stem" x1="389" y1="265" x2="389" y2="300"/>
+        </g>
+        <g class="axs-target" data-when="3">
+          <rect x="464" y="300" width="118" height="34" rx="5"/>
+          <text class="axs-ttext" x="523" y="321">ssh-agent · sign</text>
+          <line class="axs-stem" x1="523" y1="265" x2="523" y2="300"/>
+        </g>
+        <g class="axs-target" data-when="3">
+          <rect x="598" y="300" width="118" height="34" rx="5"/>
+          <text class="axs-ttext" x="657" y="321">browser · PAM tab</text>
+          <line class="axs-stem" x1="657" y1="265" x2="657" y2="300"/>
+        </g>
+
+        <circle class="axs-token" cx="140" cy="250" r="7" data-token/>
+        <text class="axs-note axs-note-h" x="430" y="360" text-anchor="middle">no gate fires — it is your own standing authority</text>
+      </g>
+
+      <!-- TCC: the one horizontal gate, wrong target, wrong name -->
+      <g class="axs-layer" data-when="4">
+        <line class="axs-branch" x1="105" y1="265" x2="60" y2="360"/>
+        <rect class="axs-tccgate" x="44" y="356" width="48" height="9" rx="2" transform="rotate(-25 68 360)"/>
+        <rect class="axs-tcccard" x="22" y="372" width="120" height="40" rx="5"/>
+        <text class="axs-ttext" x="82" y="389">Photos ·</text>
+        <text class="axs-ttext" x="82" y="404">Documents</text>
+        <text class="axs-tcclbl" x="158" y="386">TCC fires here —</text>
+        <text class="axs-tcclbl" x="158" y="401">as “Terminal”, not the agent</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="axs-cap" data-cap></div>
+
+  <div class="axs-controls">
+    <button class="axs-btn" data-prev aria-label="Previous">&larr;</button>
+    <button class="axs-dots" data-dots></button>
+    <button class="axs-btn axs-btn-key" data-next aria-label="Next">Next &rarr;</button>
+  </div>
+</div>
+
+<style>
+.axs {
+  --ink:#0c0c0d; --panel:#151517; --line:#2a2a2e; --paper:#e9e6df; --muted:#8d8d8a; --rust:#c25a2e; --rust-dim:#6b3a26;
+  color:var(--paper); background:var(--ink); border:1px solid var(--line); border-radius:10px;
+  padding:1.1rem 1.1rem 1.25rem; margin:2rem 0;
+  font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; font-size:.95rem; line-height:1.5;
+}
+.axs *{box-sizing:border-box;}
+.axs-title{font-weight:700; font-size:1.05rem; letter-spacing:.01em;}
+.axs-sub{color:var(--muted); font-size:.85rem; margin-top:.2rem;}
+.axs-stage{margin:.9rem 0 .2rem;}
+.axs svg{width:100%; height:auto; display:block;}
+
+.axs-axis{stroke:var(--line); stroke-width:2;}
+.axs-arrow{fill:var(--line);}
+.axs-axislbl{fill:var(--muted); font-size:13px; letter-spacing:.02em;}
+.axs-princ{fill:var(--rust); stroke:var(--ink); stroke-width:2;}
+.axs-princlbl{fill:var(--paper); font-size:13px; text-anchor:middle; font-weight:600;}
+
+.axs-gate rect{fill:var(--paper);}
+.axs-gtext{fill:var(--paper); font-size:13px; font-weight:600;}
+.axs-note{fill:var(--muted); font-size:12px; font-style:italic; text-anchor:middle;}
+
+.axs-target rect{fill:#1d1d20; stroke:var(--line); stroke-width:1;}
+.axs-ttext{fill:var(--paper); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; text-anchor:middle;}
+.axs-stem{stroke:var(--line); stroke-width:1; stroke-dasharray:2 3;}
+.axs-token{fill:var(--rust);}
+
+.axs-branch{stroke:var(--line); stroke-width:1.5; stroke-dasharray:3 3;}
+.axs-tccgate{fill:var(--rust);}
+.axs-tcccard{fill:#1d1d20; stroke:var(--rust-dim); stroke-width:1;}
+.axs-tcclbl{fill:var(--rust); font-size:12px;}
+
+/* layer dimming by step */
+.axs-layer{opacity:.16; transition:opacity .35s;}
+.axs[data-step="1"] [data-when~="1"],
+.axs[data-step="2"] [data-when~="2"],
+.axs[data-step="3"] [data-when~="3"],
+.axs[data-step="4"] [data-when~="4"]{opacity:1;}
+/* keep principal + already-shown axes lightly visible as context */
+.axs[data-step="3"] [data-when~="2"],
+.axs[data-step="4"] [data-when~="2"],
+.axs[data-step="4"] [data-when~="3"]{opacity:.4;}
+@media (prefers-reduced-motion: reduce){ .axs-layer{transition:none;} }
+
+.axs-cap{color:var(--paper); font-size:.9rem; min-height:2.6em; margin:.5rem 0 .2rem;}
+.axs-cap b{color:var(--rust);}
+.axs-controls{display:flex; align-items:center; gap:.5rem; margin-top:.5rem;}
+.axs-btn{background:transparent; color:var(--paper); border:1px solid var(--line); border-radius:6px; padding:.36rem .7rem; font-size:.85rem; cursor:pointer; transition:border-color .15s;}
+.axs-btn:hover{border-color:var(--paper);} .axs-btn:disabled{opacity:.35; cursor:default;}
+.axs-btn-key{background:var(--rust); border-color:var(--rust); color:#fff; font-weight:600;}
+.axs-btn-key:hover{border-color:#fff;}
+.axs-dots{flex:1; background:transparent; border:none; color:var(--muted); font-size:.8rem; text-align:center; letter-spacing:.3em; cursor:default;}
+</style>
+
+<script>
+(function(){
+  var CAPS = [
+    "",
+    "<b>You.</b> Already signed in — the principal every gate and every credential answers to.",
+    "<b>Up is escalation.</b> UAC, sudo, and polkit gate the climb from your account to root. They hold — and the agent almost never needs to climb.",
+    "<b>Sideways is ambient reach.</b> git push, az delete, ssh-agent, the open browser — your own standing authority across everything you’re logged into. No gate fires; nothing is being escalated.",
+    "<b>The one exception.</b> macOS TCC is the lone horizontal gate. It fires for Photos and Documents — not <b>~/.aws</b> or the repo — and under the name “Terminal”, never the agent."
+  ];
+  function init(root){
+    var step=1, max=4;
+    var cap=root.querySelector("[data-cap]"), dots=root.querySelector("[data-dots]");
+    var prev=root.querySelector("[data-prev]"), next=root.querySelector("[data-next]");
+    var token=root.querySelector("[data-token]");
+    var TX=[null,140,140,657,140];
+    function render(){
+      root.setAttribute("data-step", step);
+      cap.innerHTML=CAPS[step];
+      dots.textContent=Array.from({length:max},function(_,i){return i+1===step?"●":"○";}).join(" ");
+      prev.disabled=step===1; next.disabled=step===max;
+      if(token){ token.setAttribute("cx", TX[step]); }
+    }
+    prev.addEventListener("click",function(){ if(step>1){step--;render();} });
+    next.addEventListener("click",function(){ if(step<max){step++;render();} });
+    render();
+  }
+  document.querySelectorAll("[data-axs]").forEach(init);
+})();
+</script>

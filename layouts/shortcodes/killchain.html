@@ -1,0 +1,120 @@
+<!-- Horizontal kill-chain step-through. Self-contained: scoped CSS + vanilla JS, no deps. -->
+<div class="kch" data-kch>
+  <div class="kch-head">
+    <div class="kch-title">The horizontal kill chain</div>
+    <div class="kch-sub">One machine. Each rung spends authority you already hold — escalating from common to conditional. No rung asks the OS to elevate anything.</div>
+  </div>
+
+  <div class="kch-grid">
+    <div class="kch-col">
+      <ol class="kch-rungs" data-rungs></ol>
+    </div>
+    <div class="kch-col kch-detail" data-detail></div>
+  </div>
+
+  <div class="kch-controls">
+    <button class="kch-btn" data-prev aria-label="Previous rung">&larr; Back</button>
+    <button class="kch-btn kch-btn-key" data-next aria-label="Next rung">Descend &rarr;</button>
+    <button class="kch-btn" data-reset>Reset</button>
+    <span class="kch-progress" data-progress></span>
+  </div>
+</div>
+
+<style>
+.kch{
+  --ink:#0c0c0d; --panel:#151517; --line:#2a2a2e; --paper:#e9e6df; --muted:#8d8d8a; --rust:#c25a2e; --rust-dim:#6b3a26;
+  color:var(--paper); background:var(--ink); border:1px solid var(--line); border-radius:10px;
+  padding:1.1rem 1.1rem 1.25rem; margin:2rem 0;
+  font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; font-size:.95rem; line-height:1.5;
+}
+.kch *{box-sizing:border-box;}
+.kch-title{font-weight:700; font-size:1.05rem; letter-spacing:.01em;}
+.kch-sub{color:var(--muted); font-size:.85rem; margin-top:.2rem;}
+.kch-grid{display:grid; grid-template-columns:1fr 1fr; gap:.9rem; margin-top:.9rem;}
+@media (max-width:640px){ .kch-grid{grid-template-columns:1fr;} }
+.kch-col{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:.7rem .8rem;}
+
+.kch-rungs{list-style:none; margin:0; padding:0;}
+.kch-rung{position:relative; padding:.55rem 0 .55rem 1.5rem; border-left:2px solid var(--line); opacity:.34; cursor:pointer; transition:opacity .25s;}
+.kch-rung::before{content:""; position:absolute; left:-8px; top:.82rem; width:12px; height:12px; border-radius:50%; background:var(--ink); border:2px solid var(--line);}
+.kch-rung.on{opacity:1;}
+.kch-rung.on::before{border-color:var(--rust); background:var(--rust);}
+.kch-rung.done{opacity:.7;}
+.kch-rung.done::before{border-color:var(--paper);}
+.kch-rung:last-child{border-left-color:transparent;}
+.kch-rung-name{font-weight:600; font-size:.92rem;}
+.kch-rung-kind{color:var(--muted); font-size:.76rem;}
+.kch-rung-like{display:inline-block; font-size:.68rem; text-transform:uppercase; letter-spacing:.1em; padding:.05rem .4rem; border-radius:4px; border:1px solid var(--line); margin-left:.4rem; vertical-align:1px;}
+.kch-rung-like.common{color:var(--rust); border-color:var(--rust-dim);}
+.kch-rung-like.conditional{color:var(--muted);}
+
+.kch-detail{display:flex; flex-direction:column; gap:.55rem; min-height:9rem;}
+.kch-d-name{font-weight:700; font-size:1rem;}
+.kch-d-row{font-size:.85rem;}
+.kch-d-k{font-size:.68rem; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); display:block;}
+.kch-d-spend{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.8rem; color:var(--paper);}
+.kch-d-act{font-size:.86rem;}
+.kch-d-gate{font-size:.84rem; border-top:1px solid var(--line); padding-top:.5rem;}
+.kch-d-gate b{color:var(--rust);}
+
+.kch-controls{display:flex; flex-wrap:wrap; align-items:center; gap:.45rem; margin-top:.9rem;}
+.kch-btn{background:transparent; color:var(--paper); border:1px solid var(--line); border-radius:6px; padding:.36rem .7rem; font-size:.82rem; cursor:pointer; transition:border-color .15s;}
+.kch-btn:hover{border-color:var(--paper);} .kch-btn:disabled{opacity:.35; cursor:default;}
+.kch-btn-key{background:var(--rust); border-color:var(--rust); color:#fff; font-weight:600;}
+.kch-btn-key:hover{border-color:#fff;}
+.kch-progress{color:var(--muted); font-size:.8rem; margin-left:auto;}
+@media (prefers-reduced-motion: reduce){ .kch-rung{transition:none;} }
+</style>
+
+<script>
+(function(){
+  var RUNGS=[
+    { name:"1 · the repo", kind:"supply chain", like:"common",
+      spend:"ambient git + gh",
+      act:"Not deletion — shipping. One line slipped into a build script, or a release published with your npm token: your signature on someone else's payload.",
+      gate:"No gate. Where a developer still has a direct push-or-publish path to prod — and many do — protected branches never see a trusted local push as anything but you." },
+    { name:"2 · the cloud CLI", kind:"destruction", like:"common",
+      spend:"warm az / aws / kubectl session",
+      act:"az group delete · aws s3 rb --force · kubectl delete ns prod — the operator's own standing role, broad by habit and never trimmed.",
+      gate:"No gate. Nothing is escalated; it is your RBAC. Quieter and likelier: a subtle code change or a leaked dataset, the same authority used patiently." },
+    { name:"3 · the browser", kind:"session riding", like:"conditional",
+      spend:"the default profile's live cookies",
+      act:"Drive the cloud console, CI dashboard, and admin portal as you — already authenticated, one click from what the CLI would make you type.",
+      gate:"Conditional: needs a browser-control tool, or the accessibility / automation permission the terminal usually already holds." },
+    { name:"4 · the PAM tab", kind:"the ceiling", like:"conditional",
+      spend:"your already-authenticated PAM session",
+      act:"Check out a privileged credential through the open tab — satisfying the standing session, a justification text box, and a click. No cryptography is broken.",
+      gate:"Stopped cold by a fresh out-of-band act — step-up MFA, a WebAuthn touch, dual-control approval. PAM holds precisely when it reintroduces a non-ambient check." }
+  ];
+  function init(root){
+    var step=0, max=RUNGS.length;
+    var rungsEl=root.querySelector("[data-rungs]"), detail=root.querySelector("[data-detail]");
+    var prev=root.querySelector("[data-prev]"), next=root.querySelector("[data-next]"), reset=root.querySelector("[data-reset]"), prog=root.querySelector("[data-progress]");
+    RUNGS.forEach(function(r,i){
+      var li=document.createElement("li");
+      li.className="kch-rung";
+      li.innerHTML='<div class="kch-rung-name">'+r.name+'<span class="kch-rung-like '+r.like+'">'+r.like+'</span></div>'+
+                   '<div class="kch-rung-kind">'+r.kind+'</div>';
+      li.addEventListener("click",function(){ step=i; render(); });
+      rungsEl.appendChild(li);
+    });
+    function render(){
+      var lis=rungsEl.querySelectorAll(".kch-rung");
+      lis.forEach(function(li,i){ li.classList.toggle("on",i===step); li.classList.toggle("done",i<step); });
+      var r=RUNGS[step];
+      detail.innerHTML=
+        '<div class="kch-d-name">'+r.name+'</div>'+
+        '<div class="kch-d-row"><span class="kch-d-k">spends</span><span class="kch-d-spend">'+r.spend+'</span></div>'+
+        '<div class="kch-d-row"><span class="kch-d-k">does</span><span class="kch-d-act">'+r.act+'</span></div>'+
+        '<div class="kch-d-gate"><span class="kch-d-k">gate</span>'+r.gate+'</div>';
+      prog.textContent="Rung "+(step+1)+" of "+max;
+      prev.disabled=step===0; next.disabled=step===max-1;
+    }
+    prev.addEventListener("click",function(){ if(step>0){step--;render();} });
+    next.addEventListener("click",function(){ if(step<max-1){step++;render();} });
+    reset.addEventListener("click",function(){ step=0; render(); });
+    render();
+  }
+  document.querySelectorAll("[data-kch]").forEach(init);
+})();
+</script>
