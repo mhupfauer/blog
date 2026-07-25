@@ -1,0 +1,237 @@
+<!-- Agentic SOC architecture step-through. Self-contained: scoped CSS + JS-rendered inline SVG, no deps. -->
+<div class="sar" data-sar>
+  <div class="sar-head">
+    <div class="sar-title">Where the agent actually sits</div>
+    <div class="sar-sub">Four tools nobody integrated, three loops on different clocks, and one gate that decides whether anything gets touched. Step through it.</div>
+  </div>
+
+  <div class="sar-stage">
+    <svg viewBox="0 0 780 600" role="img" data-svg
+         aria-label="Architecture diagram: threat intel and vulnerability findings trigger three agent loops over a SIEM, EDR and SOAR, with a CMDB and playbook repository gating any response action">
+      <defs>
+        <marker id="sar-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#5d5d62"/>
+        </marker>
+        <marker id="sar-ah-on" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#c25a2e"/>
+        </marker>
+      </defs>
+      <g data-edges></g>
+      <g data-nodes></g>
+    </svg>
+  </div>
+
+  <div class="sar-caption" data-caption></div>
+
+  <div class="sar-controls">
+    <button class="sar-btn" data-prev aria-label="Previous layer">&larr; Back</button>
+    <button class="sar-btn sar-btn-key" data-next aria-label="Next layer">Add layer &rarr;</button>
+    <button class="sar-btn" data-reset>Reset</button>
+    <span class="sar-progress" data-progress></span>
+  </div>
+</div>
+
+<style>
+.sar{
+  --ink:#0c0c0d; --panel:#151517; --line:#2a2a2e; --paper:#e9e6df; --muted:#8d8d8a; --rust:#c25a2e; --rust-dim:#6b3a26;
+  color:var(--paper); background:var(--ink); border:1px solid var(--line); border-radius:10px;
+  padding:1.1rem 1.1rem 1.25rem; margin:2rem 0;
+  font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; font-size:.95rem; line-height:1.5;
+}
+.sar *{box-sizing:border-box;}
+.sar-title{font-weight:700; font-size:1.05rem; letter-spacing:.01em;}
+.sar-sub{color:var(--muted); font-size:.85rem; margin-top:.2rem;}
+.sar-stage{margin-top:.9rem; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:.5rem;}
+.sar-stage svg{display:block; width:100%; height:auto;}
+
+.sar-n rect{fill:var(--ink); stroke:var(--line); stroke-width:1.5;}
+.sar-n .sar-nl{fill:var(--paper); font-size:14px; font-weight:600;}
+.sar-n .sar-ns{fill:var(--muted); font-size:11.5px;}
+.sar-n .sar-nt{fill:var(--muted); font-size:10px; letter-spacing:.14em; text-transform:uppercase;}
+.sar-n{opacity:.16; transition:opacity .3s;}
+.sar-n.on{opacity:1;}
+.sar-n.fresh rect{stroke:var(--rust); stroke-width:2;}
+.sar-n.fresh .sar-nt{fill:var(--rust);}
+.sar-n.loop rect{fill:#121214;}
+.sar-n.gate rect{stroke-dasharray:5 3;}
+
+.sar-e{opacity:.14; transition:opacity .3s;}
+.sar-e.on{opacity:1;}
+.sar-e path{fill:none; stroke:#5d5d62; stroke-width:1.5; marker-end:url(#sar-ah);}
+.sar-e.fresh path{stroke:var(--rust); marker-end:url(#sar-ah-on);}
+.sar-e.both path{marker-start:url(#sar-ah);}
+.sar-e.both.fresh path{marker-start:url(#sar-ah-on);}
+.sar-e text{fill:var(--muted); font-size:10.5px;}
+.sar-e.fresh text{fill:var(--rust);}
+
+.sar-caption{margin-top:.85rem; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:.7rem .8rem; min-height:6.2rem;}
+.sar-c-k{font-size:.68rem; text-transform:uppercase; letter-spacing:.1em; color:var(--rust); display:block; margin-bottom:.15rem;}
+.sar-c-h{font-weight:700; font-size:1rem; margin-bottom:.3rem;}
+.sar-c-b{font-size:.88rem;}
+.sar-c-b em{color:var(--paper); font-style:italic;}
+.sar-c-n{font-size:.82rem; color:var(--muted); border-top:1px solid var(--line); margin-top:.5rem; padding-top:.45rem;}
+
+.sar-controls{display:flex; flex-wrap:wrap; align-items:center; gap:.45rem; margin-top:.9rem;}
+.sar-btn{background:transparent; color:var(--paper); border:1px solid var(--line); border-radius:6px; padding:.36rem .7rem; font-size:.82rem; cursor:pointer; transition:border-color .15s;}
+.sar-btn:hover{border-color:var(--paper);} .sar-btn:disabled{opacity:.35; cursor:default;}
+.sar-btn-key{background:var(--rust); border-color:var(--rust); color:#fff; font-weight:600;}
+.sar-btn-key:hover{border-color:#fff;}
+.sar-progress{color:var(--muted); font-size:.8rem; margin-left:auto;}
+@media (prefers-reduced-motion: reduce){ .sar-n,.sar-e{transition:none;} }
+</style>
+
+<script>
+(function(){
+  var NS="http://www.w3.org/2000/svg";
+
+  var NODES=[
+    // step 0 — the estate, four consoles, nothing shared
+    {id:"vm",   s:0, x:430, y:34,  w:210, h:52, tag:"scanner",     l:"vulnerability mgmt", b:"findings · EPSS · KEV"},
+    {id:"siem", s:0, x:95,  y:344, w:170, h:52, tag:"log estate",  l:"SIEM",      b:"events · correlation rules"},
+    {id:"edr",  s:0, x:305, y:344, w:170, h:52, tag:"endpoint",    l:"EDR / XDR", b:"telemetry · isolate host"},
+    {id:"soar", s:0, x:515, y:344, w:170, h:52, tag:"cases",       l:"SOAR",      b:"incidents · playbooks"},
+    // step 1 — intel intake and relevance
+    {id:"ti",   s:1, x:140, y:34,  w:210, h:52, tag:"external",    l:"threat intel", b:"MISP / OpenCTI · STIX"},
+    {id:"ctx",  s:1, x:235, y:126, w:310, h:52, tag:"the prior",   l:"relevance filter", b:"does this touch anything we own?"},
+    // steps 2-4 — the three loops
+    {id:"l1",   s:2, x:35,  y:216, w:215, h:82, tag:"daily",  l:"detection review", b:"read yesterday's logs,|propose rule diffs as a PR", cls:"loop"},
+    {id:"l2",   s:3, x:282, y:216, w:215, h:82, tag:"~60 s",  l:"event watch", b:"cross-environment shapes|no static rule has a feel for", cls:"loop"},
+    {id:"l3",   s:4, x:529, y:216, w:215, h:82, tag:"on case", l:"triage + enrichment", b:"sub-agents fan out,|case filled in 2–5 min", cls:"loop"},
+    // step 5 — the authority substrate
+    {id:"cmdb", s:5, x:35,  y:442, w:200, h:64, tag:"asset truth", l:"the allowlist", b:"green / amber / red,|small enough to be true", cls:"gate"},
+    {id:"gate", s:5, x:290, y:442, w:200, h:64, tag:"the question", l:"may I?", b:"scope × action,|decided in advance", cls:"gate"},
+    {id:"pbk",  s:5, x:545, y:442, w:200, h:64, tag:"agreed plan",  l:"playbook repo", b:"folders in git, one|per business service", cls:"gate"},
+    {id:"auto", s:5, x:165, y:534, w:180, h:44, tag:"", l:"act now", b:""},
+    {id:"hum",  s:5, x:435, y:534, w:180, h:44, tag:"", l:"wake a human", b:""}
+  ];
+
+  var EDGES=[
+    {s:1, from:"ti",  to:"ctx"},
+    {s:1, from:"vm",  to:"ctx"},
+    {s:2, from:"ctx", to:"l1"},
+    {s:2, from:"l1",  to:"siem", both:true, lbl:"logs / rules"},
+    {s:3, from:"ctx", to:"l2"},
+    {s:3, from:"l2",  to:"siem", both:true, lbl:"query"},
+    {s:3, from:"l2",  to:"soar", lbl:"raise", t:.30},
+    {s:4, from:"soar",to:"l3",   both:true, lbl:"case", t:.55},
+    {s:4, from:"l3",  to:"edr",  both:true, lbl:"enrich", t:.70},
+    {s:5, from:"soar",to:"gate"},
+    {s:5, from:"cmdb",to:"gate"},
+    {s:5, from:"pbk", to:"gate"},
+    {s:5, from:"gate",to:"auto"},
+    {s:5, from:"gate",to:"hum"}
+  ];
+
+  var STEPS=[
+    {k:"step 1 · the estate",
+     h:"Four tools, four consoles, no shared brain",
+     b:"This is the org that did <em>not</em> go all-in on one vendor. Best-of-breed in each box, and the integration bill left unpaid. Every one of these knows something the others need, and none of them will volunteer it.",
+     n:"The suite vendors sell this problem as the reason to consolidate. Consolidating is one answer. Building the connective tissue yourself is the other, and it is the one nobody writes the architecture for."},
+    {k:"step 2 · the prior",
+     h:"Intel raises sensitivity — it does not pull the trigger",
+     b:"External intel says <em>what is being done to organisations like yours</em>; the scanner says <em>what is soft here</em>. The tempting design fires a hunt on the overlap. The volumes will not carry it: only 52 CVEs in all of 2025 carried a named actor, before you intersect with anything you own.",
+     n:"So it feeds forward as a weighting, not an event — raising sensitivity on assets running the named software and lowering the bar at which the system bothers a human about them."},
+    {k:"step 3 · the slow loop",
+     h:"Daily: the detections nobody has time to write",
+     b:"Overnight, read what actually landed in the log estate — the fields that are populated, the noise that fires, the coverage that is missing against the intel from step 2 — and open a pull request with rule changes. <em>A pull request</em>, not a deployment.",
+     n:"Detection engineering is a backlog problem before it is an intelligence problem. This loop is the one with the least glamour and the clearest return."},
+    {k:"step 4 · the fast loop",
+     h:"Every minute: the shapes rules can't hold",
+     b:"Static correlation stays exactly where it is — five failures an hour still opens a case, and it should. This loop is for the thing a threshold cannot express: a service account that authenticates normally, from a normal place, at a normal hour, and then does three unremarkable things in three different systems that are only strange <em>together</em>.",
+     n:"Most of this loop is not the model. Deterministic aggregations run the 60-second cadence at zero token cost; the model is invoked only on the residue they flag. It ends its turn by opening a case, which is a claim, not an action."},
+    {k:"step 5 · the fan-out",
+     h:"On a case: the first ten questions, asked in parallel",
+     b:"Every analyst opens a new incident and asks roughly the same opening set — who is this user, is this host patched, has this hash been seen, what else did that IP touch, was there a ticket. Those are independent queries. Run them as sub-agents against every tool at once and the case is populated before a human has finished reading the title.",
+     n:"Nothing here is a decision. This is evidence assembly — the part of the job that is genuinely mechanical, and the part analysts spend most of their night on."},
+    {k:"step 6 · the gate",
+     h:"And here is the only hard problem",
+     b:"The agent now wants to <em>do</em> something. Whether it may depends on two facts it cannot infer: what this asset actually is, and what was agreed in advance about assets like it. A laptop and a core banking node take the same API call and are not the same decision.",
+     n:"Both inputs are organisational, not technical. This is why the interesting work in an agentic SOC turns out to be asset management and pre-agreed response plans — the two things nobody wanted to fund."}
+  ];
+
+  function byId(id){ for(var i=0;i<NODES.length;i++){ if(NODES[i].id===id) return NODES[i]; } }
+  function cx(n){ return n.x+n.w/2; } function cy(n){ return n.y+n.h/2; }
+
+  // anchor on the box edge facing the other box
+  function anchor(a,b){
+    var dx=cx(b)-cx(a), dy=cy(b)-cy(a);
+    if(Math.abs(dy)*a.w > Math.abs(dx)*a.h){       // mostly vertical
+      return [cx(a)+ (dx/Math.abs(dy||1))*(a.h/2) * .55, dy>0 ? a.y+a.h : a.y];
+    }
+    return [dx>0 ? a.x+a.w : a.x, cy(a) + (dy/Math.abs(dx||1))*(a.w/2) * .35];
+  }
+
+  function el(name,attrs,cls){
+    var e=document.createElementNS(NS,name);
+    for(var k in attrs) e.setAttribute(k,attrs[k]);
+    if(cls) e.setAttribute("class",cls);
+    return e;
+  }
+
+  function init(root){
+    var step=0, max=STEPS.length;
+    var svg=root.querySelector("[data-svg]");
+    var gN=root.querySelector("[data-nodes]"), gE=root.querySelector("[data-edges]");
+    var cap=root.querySelector("[data-caption]");
+    var prev=root.querySelector("[data-prev]"), next=root.querySelector("[data-next]"),
+        reset=root.querySelector("[data-reset]"), prog=root.querySelector("[data-progress]");
+
+    NODES.forEach(function(n){
+      var g=el("g",{},"sar-n"+(n.cls?" "+n.cls:""));
+      g.appendChild(el("rect",{x:n.x,y:n.y,width:n.w,height:n.h,rx:7}));
+      if(n.tag) g.appendChild(txt(n.x+12, n.y+15, n.tag, "sar-nt"));
+      var ly = n.tag ? n.y+31 : (n.b ? n.y+22 : n.y+n.h/2+5);
+      g.appendChild(txt(n.x+12, ly, n.l, "sar-nl"));
+      if(n.b){
+        n.b.split("|").forEach(function(line,i){
+          g.appendChild(txt(n.x+12, ly+15+i*13, line, "sar-ns"));
+        });
+      }
+      n._g=g; gN.appendChild(g);
+    });
+
+    EDGES.forEach(function(e){
+      var a=byId(e.from), b=byId(e.to);
+      var p1=anchor(a,b), p2=anchor(b,a);
+      var g=el("g",{},"sar-e"+(e.both?" both":""));
+      var f=(typeof e.t==="number")?e.t:.5;
+      var mx=p1[0]+(p2[0]-p1[0])*f, my=p1[1]+(p2[1]-p1[1])*f;
+      g.appendChild(el("path",{d:"M "+p1[0]+" "+p1[1]+" L "+p2[0]+" "+p2[1]}));
+      if(e.lbl){
+        var t=txt(mx, my-5, e.lbl, "");
+        t.setAttribute("text-anchor","middle");
+        g.appendChild(t);
+      }
+      e._g=g; gE.appendChild(g);
+    });
+
+    function txt(x,y,s,cls){
+      var t=el("text",{x:x,y:y},cls); t.textContent=s; return t;
+    }
+
+    function render(){
+      NODES.forEach(function(n){
+        n._g.classList.toggle("on", n.s<=step);
+        n._g.classList.toggle("fresh", n.s===step);
+      });
+      EDGES.forEach(function(e){
+        e._g.classList.toggle("on", e.s<=step);
+        e._g.classList.toggle("fresh", e.s===step);
+      });
+      var s=STEPS[step];
+      cap.innerHTML='<span class="sar-c-k">'+s.k+'</span>'+
+                    '<div class="sar-c-h">'+s.h+'</div>'+
+                    '<div class="sar-c-b">'+s.b+'</div>'+
+                    '<div class="sar-c-n">'+s.n+'</div>';
+      prog.textContent="Layer "+(step+1)+" of "+max;
+      prev.disabled=step===0; next.disabled=step===max-1;
+    }
+
+    prev.addEventListener("click",function(){ if(step>0){step--;render();} });
+    next.addEventListener("click",function(){ if(step<max-1){step++;render();} });
+    reset.addEventListener("click",function(){ step=0; render(); });
+    render();
+  }
+  document.querySelectorAll("[data-sar]").forEach(init);
+})();
+</script>

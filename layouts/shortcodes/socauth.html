@@ -1,0 +1,184 @@
+<!-- Authority matrix: what an agent may do, to what, at which hour. Self-contained: scoped CSS + vanilla JS, no deps. -->
+<div class="sau" data-sau>
+  <div class="sau-head">
+    <div class="sau-title">What is it allowed to do?</div>
+    <div class="sau-sub">Actions down the side, ordered by how hard they are to undo. Asset classes across the top. Flip the switch and watch which cells move — and which ones refuse to.</div>
+  </div>
+
+  <div class="sau-toggle">
+    <span class="sau-tg-l">Someone is awake to confirm</span>
+    <button class="sau-sw" data-sw role="switch" aria-checked="true" aria-label="Toggle 24/7 human coverage">
+      <span class="sau-sw-k"></span>
+    </button>
+    <span class="sau-tg-s" data-swlbl>24/7 SOC — a human is on shift at 03:00</span>
+  </div>
+
+  <div class="sau-scroll">
+    <div class="sau-grid" data-grid></div>
+  </div>
+
+  <div class="sau-legend">
+    <span><i class="sau-d auto"></i>agent acts</span>
+    <span><i class="sau-d budget"></i>acts, under a blast-radius budget</span>
+    <span><i class="sau-d confirm"></i>proposes — a human presses it</span>
+    <span><i class="sau-d never"></i>not an agent action at any hour</span>
+  </div>
+
+  <div class="sau-detail" data-detail></div>
+</div>
+
+<style>
+.sau{
+  --ink:#0c0c0d; --panel:#151517; --line:#2a2a2e; --paper:#e9e6df; --muted:#8d8d8a; --rust:#c25a2e; --rust-dim:#6b3a26;
+  color:var(--paper); background:var(--ink); border:1px solid var(--line); border-radius:10px;
+  padding:1.1rem 1.1rem 1.25rem; margin:2rem 0;
+  font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; font-size:.95rem; line-height:1.5;
+}
+.sau *{box-sizing:border-box;}
+.sau-title{font-weight:700; font-size:1.05rem; letter-spacing:.01em;}
+.sau-sub{color:var(--muted); font-size:.85rem; margin-top:.2rem;}
+
+.sau-toggle{display:flex; align-items:center; gap:.55rem; margin-top:.9rem; flex-wrap:wrap;}
+.sau-tg-l{font-size:.82rem; color:var(--muted);}
+.sau-tg-s{font-size:.82rem; color:var(--paper); font-weight:600;}
+.sau-sw{position:relative; width:44px; height:24px; border-radius:12px; border:1px solid var(--rust); background:var(--rust); cursor:pointer; padding:0; transition:background .2s,border-color .2s;}
+.sau-sw[aria-checked="false"]{background:var(--panel); border-color:var(--line);}
+.sau-sw-k{position:absolute; top:2px; left:22px; width:18px; height:18px; border-radius:50%; background:#fff; transition:left .2s;}
+.sau-sw[aria-checked="false"] .sau-sw-k{left:2px; background:var(--muted);}
+
+.sau-scroll{overflow-x:auto; margin-top:.9rem;}
+.sau-grid{display:grid; grid-template-columns:minmax(200px,1.5fr) repeat(4,minmax(96px,1fr)); gap:3px; min-width:640px;}
+.sau-ch{font-size:.72rem; color:var(--muted); letter-spacing:0; padding:.3rem .35rem .45rem; align-self:end; text-align:center; line-height:1.3;}
+.sau-ch b{display:block; color:var(--paper); font-size:.8rem; font-weight:600; margin-bottom:.1rem;}
+.sau-rh{background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:.42rem .55rem;}
+.sau-rh-l{font-size:.85rem; font-weight:600;}
+.sau-rh-r{font-size:.7rem; color:var(--muted);}
+.sau-c{border:1px solid var(--line); border-radius:6px; background:var(--panel); cursor:pointer; padding:.4rem .3rem; font:inherit; color:var(--paper);
+  font-size:.7rem; text-transform:uppercase; letter-spacing:.07em; transition:background .25s,border-color .25s,color .25s;}
+.sau-c:hover{border-color:var(--paper);}
+.sau-c.sel{outline:1px solid var(--paper); outline-offset:1px;}
+.sau-c.auto{background:rgba(194,90,46,.16); border-color:var(--rust-dim); color:var(--rust);}
+.sau-c.budget{background:rgba(194,90,46,.07); border-color:var(--rust-dim); color:#a8724f;}
+.sau-c.confirm{background:var(--panel); border-color:var(--line); color:var(--muted);}
+.sau-c.never{background:#0a0a0b; border-color:#1d1d20; color:#4a4a4e; text-decoration:line-through;}
+.sau-c.moved{border-color:var(--paper);}
+
+.sau-legend{display:flex; flex-wrap:wrap; gap:.9rem; margin-top:.7rem; font-size:.76rem; color:var(--muted);}
+.sau-legend span{display:flex; align-items:center; gap:.35rem;}
+.sau-d{width:10px; height:10px; border-radius:3px; display:inline-block; border:1px solid var(--line);}
+.sau-d.auto{background:rgba(194,90,46,.5); border-color:var(--rust);}
+.sau-d.budget{background:rgba(194,90,46,.18); border-color:var(--rust-dim);}
+.sau-d.confirm{background:var(--panel);}
+.sau-d.never{background:#0a0a0b; border-color:#1d1d20;}
+
+.sau-detail{margin-top:.85rem; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:.7rem .8rem; min-height:5.4rem; font-size:.87rem;}
+.sau-dt-k{font-size:.68rem; text-transform:uppercase; letter-spacing:.1em; color:var(--rust); display:block; margin-bottom:.15rem;}
+.sau-dt-h{font-weight:700; margin-bottom:.28rem;}
+.sau-dt-h span{color:var(--muted); font-weight:400;}
+@media (prefers-reduced-motion: reduce){ .sau-c,.sau-sw,.sau-sw-k{transition:none;} }
+</style>
+
+<script>
+(function(){
+  var ASSETS=[
+    {id:"ws",     l:"workstation",  s:"one of many"},
+    {id:"pool",   l:"pooled node",  s:"one of several"},
+    {id:"single", l:"singleton",    s:"no second instance"},
+    {id:"t0",     l:"tier-0 / core",s:"DC, DNS, the ledger"}
+  ];
+
+  var ACTIONS=[
+    {id:"obs",  l:"observe and enrich",              r:"read-only",
+     on:["auto","auto","auto","auto"], off:["auto","auto","auto","auto"]},
+    {id:"sev",  l:"raise severity, open a case",     r:"reversible — and never downward",
+     on:["auto","auto","auto","auto"], off:["auto","auto","auto","auto"]},
+    {id:"quar", l:"kill process, quarantine file",   r:"mostly reversible",
+     on:["auto","auto","confirm","confirm"], off:["auto","auto","budget","confirm"]},
+    {id:"tok",  l:"revoke a service principal's tokens", r:"reversible — it re-authenticates",
+     on:["auto","auto","confirm","confirm"], off:["auto","auto","budget","confirm"]},
+    {id:"iso",  l:"isolate the host from the network", r:"reversible, unless that link was the way back in",
+     on:["budget","confirm","confirm","never"], off:["budget","budget","budget","never"]},
+    {id:"acct", l:"disable a person's account",      r:"reversible, but it is a person",
+     on:["confirm","confirm","confirm","confirm"], off:["confirm","confirm","confirm","confirm"]},
+    {id:"stop", l:"stop the service",                r:"irreversible in practice",
+     on:["confirm","confirm","confirm","never"], off:["confirm","confirm","confirm","never"]}
+  ];
+
+  var LABEL={auto:"act", budget:"budgeted", confirm:"propose", never:"—"};
+
+  var NOTES={
+    "obs":"Reading is free and it is the whole reason the thing exists. The only cost is query budget against the SIEM, which is a real and surprisingly tight constraint — but it is not a safety one.",
+    "sev":"The agent may argue a case is worse than the rules thought. It may never argue one is better. Downward severity is the single most valuable thing an attacker could get it to write, so the capability does not exist.",
+    "quar":"A killed process comes back on reboot and a quarantined file is restorable. On a singleton this still means a service interruption someone will page about, which is why the human stays on it while the human exists.",
+    "tok":"A service principal that loses its tokens re-authenticates and carries on, so the cost of being wrong is a blip. This is the most under-used autonomous action in most estates.",
+    "iso":"The action everyone means when they say containment, and the one with the ugliest failure mode: if the host reaches the network through the link you just cut, the undo path went with it. Budget it hard, cap it per pool, and keep an out-of-band way back.",
+    "iso-t0":"Never. Not because the model would be wrong more often here, but because the criticality field you would consult ranks assets by how much an attacker wants them, not by what falls over when they go dark. The catalogue that calls a domain controller Very High calls DNS Low.",
+    "acct":"This one does not move, at any hour, in any column. Disabling the account of a named human is an automated decision producing a significant effect on that person, which is a legal question before it is an architectural one — and in a co-determined workplace, a negotiated one.",
+    "stop":"Stopping the service is the action the whole post is circling. It is the one nobody can undo from a chat window, and the one an attacker would most like to trigger on your behalf.",
+    "stop-t0":"Never as an agent action. If the answer to a bad night is that the ledger stops, that decision belongs to a person who can be named afterwards."
+  };
+
+  function init(root){
+    var live=true, sel=null;
+    var grid=root.querySelector("[data-grid]"), detail=root.querySelector("[data-detail]");
+    var sw=root.querySelector("[data-sw]"), swlbl=root.querySelector("[data-swlbl]");
+
+    grid.appendChild(cell("div","sau-ch",""));
+    ASSETS.forEach(function(a){
+      var d=document.createElement("div"); d.className="sau-ch";
+      d.innerHTML="<b>"+a.l+"</b>"+a.s; grid.appendChild(d);
+    });
+
+    ACTIONS.forEach(function(act,ri){
+      var rh=document.createElement("div"); rh.className="sau-rh";
+      rh.innerHTML='<div class="sau-rh-l">'+act.l+'</div><div class="sau-rh-r">'+act.r+'</div>';
+      grid.appendChild(rh);
+      ASSETS.forEach(function(as,ci){
+        var b=document.createElement("button");
+        b.className="sau-c"; b.type="button";
+        b.addEventListener("click",function(){ sel=[ri,ci]; render(); });
+        act["_c"+ci]=b; grid.appendChild(b);
+      });
+    });
+
+    function cell(tag,cls,html){ var e=document.createElement(tag); e.className=cls; e.innerHTML=html; return e; }
+
+    function note(act,as,st){
+      if(NOTES[act.id+"-"+as.id]) return NOTES[act.id+"-"+as.id];
+      return NOTES[act.id]||"";
+    }
+
+    function render(){
+      ACTIONS.forEach(function(act,ri){
+        ASSETS.forEach(function(as,ci){
+          var st=(live?act.on:act.off)[ci], other=(live?act.off:act.on)[ci];
+          var b=act["_c"+ci];
+          b.className="sau-c "+st+(st!==other?" moved":"")+(sel&&sel[0]===ri&&sel[1]===ci?" sel":"");
+          b.textContent=LABEL[st];
+          b.setAttribute("aria-label",act.l+" on "+as.l+": "+LABEL[st]);
+        });
+      });
+      swlbl.textContent = live
+        ? "24/7 SOC — a human is on shift at 03:00"
+        : "No night cover — the confirmation nobody is awake to give";
+      sw.setAttribute("aria-checked", live?"true":"false");
+
+      if(sel){
+        var act=ACTIONS[sel[0]], as=ASSETS[sel[1]], st=(live?act.on:act.off)[sel[1]];
+        var other=(live?act.off:act.on)[sel[1]];
+        detail.innerHTML='<span class="sau-dt-k">'+LABEL[st]+(st!==other?" · moves with the switch":" · does not move")+'</span>'+
+          '<div class="sau-dt-h">'+act.l+' <span>on a '+as.l+'</span></div>'+
+          '<div>'+note(act,as,st)+'</div>';
+      } else {
+        detail.innerHTML='<span class="sau-dt-k">the argument, in one grid</span>'+
+          '<div class="sau-dt-h">Pick any cell for the reasoning.</div>'+
+          '<div>Turning the human off does not grant the agent new powers. It moves reversible actions on things you own many of into a budgeted lane — and leaves the person row and the tier-0 column exactly where they were. If your answer to losing night cover is to widen those two, the problem was never the automation. Note that a global action budget sits under every cell here: <em>budgeted</em> marks the actions that additionally carry a per-action cap, not the only ones that are rate-limited.</div>';
+      }
+    }
+
+    sw.addEventListener("click",function(){ live=!live; render(); });
+    render();
+  }
+  document.querySelectorAll("[data-sau]").forEach(init);
+})();
+</script>
