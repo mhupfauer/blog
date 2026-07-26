@@ -25,6 +25,10 @@ Mostly at KPMG's *Klardenker / Financial Services Hub*. German-language, financi
 
 Author archive: [klardenker.kpmg.de](https://klardenker.kpmg.de/financialservices-hub/autoren/markus-hupfauer/)
 
+## Research
+
+- [AI Red Teaming in Practice: From Awareness to Action](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7133878) — working paper on how organizations actually adopt AI red teaming, co-authored with researchers at MIT Sloan and industry colleagues. SSRN, July 2026. DOI: [10.2139/ssrn.7133878](https://doi.org/10.2139/ssrn.7133878)
+
 ## Speaking
 
 Reverse-chronological, with links where the event still has a public page.
