@@ -34,3 +34,17 @@ python3 social/linkedin/build/build-quotes.py
 python3 social/linkedin/build/build-carousel.py
 python3 social/linkedin/build/build-audiograms.py
 ```
+
+## Creatives (AI-generated)
+
+Square 1080x1080 feed images live in `linkedin/out/creative/<post-slug>.png`. Unlike the quote cards and carousel, these are **not** rebuildable from `linkedin/build/` — they come from `scripts/gen-social-creative.py`, which is gitignored because it carries an API key, and image generation is not deterministic. The committed PNG is the master; re-running produces a different image.
+
+```sh
+./scripts/gen-social-creative.py <post-slug> "<visual concept>" --variants 2
+```
+
+Two things that matter, both learned by getting them wrong first:
+
+- Use `gpt-image-2.5-flare`, not `gpt-image-2.5-sunburst`. Sunburst draws much finer line work, which moires into a flat grey block the moment LinkedIn rescales the image to feed width — the motif disappears entirely.
+- The script's `FRAMING` prompt block forces the motif to fill ~70% of the frame and to survive being scaled to 300px. Without it you get an elegant small motif with lots of negative space that reads as nothing in a feed. The blog *cover* style guide optimises for a wide hero image on a white page; a feed creative has a different job and needs the accent colour to carry at thumbnail size.
+
