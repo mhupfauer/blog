@@ -4,7 +4,7 @@ Square 1080×1080 card at `out/creative/you-cant-triage-a-bundle.png`, rebuilt b
 
 Named by post slug rather than folded into the flat `01–04` set, which belongs to the "which agent bricked prod?" campaign.
 
-The card states the dilemma flat — install it and RDS breaks, roll it back and you return 679 fixes — and hangs every caveat off an asterisk underneath. That split is deliberate: the hook stays blunt enough to stop a scroll, the nuance is all still there for anyone who opens the image, and nobody gets to accuse the card of overclaiming. The dagger hangs off the word "or", because the note it points to is the one that says the binary is false.
+The card carries one sentence and two words, at a size that lands before anyone decides whether to read. An earlier cut had asterisked footnotes and an attribution line on the image; that is the wrong instinct for a feed, where nobody reads a card. The caveats moved into the post body, which is where someone who has already stopped scrolling will actually take them in — and the article carries the full version.
 
 Recommended slot: Tuesday or Thursday, 08:30 CET. The first two lines carry it, before LinkedIn's "see more" cut. Copy and card open on the same sentence on purpose — don't reword one without the other.
 
@@ -24,7 +24,7 @@ Every figure comes from Microsoft's MSRC CVRF release data for 2026-Sep, not pre
 >
 > AI-scale discovery didn't break patching. It broke triage.
 >
-> The caveats are on the card, and one matters more than the rest: there is usually a third option nobody advertises — keep the update, turn off the offending feature. Knowing which behaviours each critical workload can survive losing, before the month you need it, is most of the job.
+> Two caveats the card has no room for. It doesn't hit every environment — Microsoft says "some organizations" and still hasn't confirmed a cause; administrators trace it to a change in remote audio redirection, which is community attribution, not a vendor statement. And there is usually a third option nobody advertises: keep the update, turn off the offending feature. Knowing which behaviours each critical workload can survive losing, before the month you need it, is most of the job.
 >
 > Counted from Microsoft's own release data, not from the coverage. Full piece in the comments.
 >
@@ -36,19 +36,11 @@ Every figure comes from Microsoft's MSRC CVRF release data for 2026-Sep, not pre
 
 ## Image text
 
-KICKER: KB5122871 · WINDOWS SERVER 2025 · 8 SEPTEMBER 2026
-HEADLINE: Tough luck if you run RDS. Either it's broken, or it's insecure.
+Deliberately minimal — a feed card is glanced at, not read. No asterisks, no footnotes, no attribution line. Every qualification lives in the post body and the article instead.
 
-LEFT — INSTALL THE UPDATE → **BROKEN\***
-Remote Desktop Services goes unstable. Connections fail after minutes, sign-ins hang, hosts wedge at logoff. Microsoft's published workaround: stop the VM, deallocate it, start it again, and wait for a future update.
-
-RIGHT — ROLL IT BACK → **INSECURE\*\***
-All 679 CVE fixes in the package go back with it. There is no way to keep 678 and drop the one that broke you, and one of the 679 is already under active exploitation.\*\*\*
-
-FOOTNOTES:
-- \* Not everywhere. Microsoft says "some organizations" and has confirmed no cause. Administrators trace the trigger to a change in remote audio redirection — that is community attribution, not a vendor statement.
-- \*\* Most of those 679 will never be used against you. That is not the point: prioritisation assumes you can act on the ranking, and inside a cumulative update you cannot express it at all.
-- \*\*\* CVE-2026-81963, Windows Update Stack elevation of privilege, flagged by Microsoft as Exploitation Detected. The month's other exploited zero-day ships in a different package.
-- † (on "or") There is a third option nobody advertises: keep the update, disable remote audio redirection by policy. Reader-reported, unconfirmed — and for a call centre the feature you just switched off is the product.
-
-ATTRIBUTION: hupfauer.one · you can't triage a bundle
+KICKER: MICROSOFT SEPTEMBER 2026 UPDATE · WINDOWS SERVER
+HEADLINE: Tough luck if you run RDS.
+INSTALL IT → **BROKEN**
+or
+ROLL IT BACK → **INSECURE**
+FOOT: 679 security fixes ship in one package. You take all of them, or none.
