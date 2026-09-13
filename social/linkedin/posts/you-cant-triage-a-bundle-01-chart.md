@@ -4,7 +4,7 @@ Square 1080×1080 card at `out/creative/you-cant-triage-a-bundle.png`, rebuilt b
 
 Named by post slug rather than folded into the flat `01–04` set, which belongs to the "which agent bricked prod?" campaign.
 
-The card carries one sentence and two words, at a size that lands before anyone decides whether to read. An earlier cut had asterisked footnotes and an attribution line on the image; that is the wrong instinct for a feed, where nobody reads a card. The caveats moved into the post body, which is where someone who has already stopped scrolling will actually take them in — and the article carries the full version.
+The card had to survive four rejected attempts: an AI illustration that said nothing, a 679-square unit chart that was too cerebral, and two typographic cuts that named the dilemma without showing what causes it. The art direction that fixed it came from gpt-6-astra, and the diagnosis was the useful part — "BROKEN or INSECURE" describes any security trade-off, while the distinctive fact, 679 fixes welded into one package, had been demoted to small print. Caveats live in the post body, not on the image.
 
 Recommended slot: Tuesday or Thursday, 08:30 CET. The first two lines carry it, before LinkedIn's "see more" cut. Copy and card open on the same sentence on purpose — don't reword one without the other.
 
@@ -36,11 +36,15 @@ Every figure comes from Microsoft's MSRC CVRF release data for 2026-Sep, not pre
 
 ## Image text
 
-Deliberately minimal — a feed card is glanced at, not read. No asterisks, no footnotes, no attribution line. Every qualification lives in the post body and the article instead.
+Concept: **one sealed package, two bad exits.** The composition is the argument — a single uninterrupted bone block holds 679 and states it cannot be subdivided, then one rust fork leaves it and splits into two consequences of identical weight. The reader should understand the trap before reading the thesis line.
 
-KICKER: MICROSOFT SEPTEMBER 2026 UPDATE · WINDOWS SERVER
-HEADLINE: Tough luck if you run RDS.
-INSTALL IT → **BROKEN**
-or
-ROLL IT BACK → **INSECURE**
-FOOT: 679 security fixes ship in one package. You take all of them, or none.
+TOP LEFT: WINDOWS SERVER 2025      TOP RIGHT: SEPTEMBER 2026
+HEADLINE: One update. / Two bad exits.
+BLOCK: **679** · CVE fixes. / One cumulative update. / No selective install.
+LEFT EXIT: INSTALL UPDATE → **BROKEN** / Remote Desktop Services fails.
+RIGHT EXIT: ROLL BACK UPDATE → **INSECURE** / All 679 fixes removed. / One actively exploited CVE.
+THESIS: Prioritisation needs a choice. / Cumulative updates remove it.
+
+No attribution line, no footnotes, no logo.
+
+Do not subdivide the block when editing — segmenting it contradicts the whole point. Keep rust to the seal and the fork only; it should read as causality, not decoration.
