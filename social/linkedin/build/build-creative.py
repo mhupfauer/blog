@@ -2,18 +2,22 @@
 """
 Render the LinkedIn creative for "You can't triage a bundle" at 1080x1080 PNG.
 
-A unit chart: one square per CVE fixed by KB5122871, the September 2026
-cumulative update for Windows Server 2025. 679 squares, exactly one of which
-is under active exploitation — and no mechanism exists to install only it.
+The card states the dilemma an RDS operator actually faced in September 2026 —
+install the cumulative update and Remote Desktop Services goes unstable, or
+roll it back and hand every security fix in the package back with it — then
+hangs the honest caveats off asterisks, so the hook stays sharp without lying.
 
-Every number here is counted from Microsoft's own machine-readable release
-data (MSRC CVRF for 2026-Sep), not from press coverage:
+Every figure is counted from Microsoft's own machine-readable release data
+(MSRC CVRF for 2026-Sep), not from press coverage:
 
-    679  CVEs whose remediation list cites KB5122871
+    679  CVEs whose remediation list cites KB5122871 (Windows Server 2025 only)
       1  of those with the MSRC threat string "Exploited:Yes"
            -> CVE-2026-81963, Windows Update Stack elevation of privilege
 
-Drawn at 2x and downsampled so the grid and the ring come out crisp.
+The release-wide September 2026 count is 966-974 across all Microsoft
+products. That is NOT this number and must never be used on this card.
+
+Drawn at 2x and downsampled so the rules and small type come out crisp.
 
 Output: social/linkedin/out/creative/you-cant-triage-a-bundle.png
 """
@@ -29,48 +33,70 @@ INK = (12, 12, 13)
 PAPER = (233, 230, 223)
 RUST = (194, 90, 46)
 MUTED = (141, 141, 138)
-DIM = (171, 167, 158)  # #ABA79E — chosen with the dataviz palette validator:
-                       # vs RUST it scores CVD deltaE 15.8 (deutan) and 19.5
-                       # normal-vision, both comfortably above the floors. A
-                       # darker grey looked better but collapsed to deltaE 7.9
-                       # under protanopia, leaving the ring as the only cue.
+FAINT = (116, 114, 110)
+HAIRLINE = (46, 45, 44)
 
 S = 2  # supersample factor
 W = H = 1080 * S
 PAD = 93 * S
 
-SERIF_ITALIC_PATH = "/System/Library/Fonts/Supplemental/Georgia Italic.ttf"
-SANS_PATH = "/System/Library/Fonts/Helvetica.ttc"
+SERIF_ITALIC = "/System/Library/Fonts/Supplemental/Georgia Italic.ttf"
+SANS = "/System/Library/Fonts/Helvetica.ttc"
 
-# --- the data ---
-TOTAL = 679
-EXPLOITED_INDEX = 302  # arbitrary cell; position carries no meaning
-COLS = 40
-CELL = 16 * S
-GAP = 6 * S
-PITCH = CELL + GAP
-
-HEADLINE = "One of these is under active attack. You install all 679, or none."
 KICKER = "KB5122871  ·  WINDOWS SERVER 2025  ·  8 SEPTEMBER 2026"
-ATTRIB = "hupfauer.one  ·  you can't triage a bundle"
+HEADLINE = "Tough luck if you run RDS. Either it’s broken, or it’s insecure."
+ATTRIB = "hupfauer.one  ·  you can’t triage a bundle"
+
+LEFT_LABEL = "INSTALL THE UPDATE"
+LEFT_VERDICT = "BROKEN"
+LEFT_STAR = "*"
+LEFT_BODY = (
+    "Remote Desktop Services goes unstable. Connections fail after minutes, "
+    "sign-ins hang, hosts wedge at logoff. Microsoft’s published workaround: "
+    "stop the VM, deallocate it, start it again, and wait for a future update."
+)
+
+RIGHT_LABEL = "ROLL IT BACK"
+RIGHT_VERDICT = "INSECURE"
+RIGHT_STAR = "**"
+RIGHT_BODY = (
+    "All 679 CVE fixes in the package go back with it. There is no way to keep "
+    "678 and drop the one that broke you, and one of the 679 is already under "
+    "active exploitation.***"
+)
+
+NOTES = [
+    ("*", "Not everywhere. Microsoft says “some organizations” and has confirmed no cause. "
+          "Administrators trace the trigger to a change in remote audio redirection — that is "
+          "community attribution, not a vendor statement."),
+    ("**", "Most of those 679 will never be used against you. That is not the point: "
+           "prioritisation assumes you can act on the ranking, and inside a cumulative update "
+           "you cannot express it at all."),
+    ("***", "CVE-2026-81963, Windows Update Stack elevation of privilege, flagged by Microsoft "
+            "as Exploitation Detected. The month’s other exploited zero-day ships in a "
+            "different package."),
+    ("†", "There is a third option nobody advertises: keep the update, disable remote audio "
+          "redirection by policy. Reader-reported, unconfirmed — and for a call centre the "
+          "feature you just switched off is the product."),
+]
 
 OUT_DIR = Path(__file__).resolve().parent.parent / "out" / "creative"
 
 
-def track(draw: ImageDraw.ImageDraw, xy, text, font, fill, spacing):
-    """Draw text with manual letter-spacing."""
+def track(d, xy, text, font, fill, spacing):
+    """Draw text with manual letter-spacing. Returns the end x."""
     x, y = xy
     for ch in text:
-        draw.text((x, y), ch, font=font, fill=fill)
-        x += draw.textlength(ch, font=font) + spacing
+        d.text((x, y), ch, font=font, fill=fill)
+        x += d.textlength(ch, font=font) + spacing
     return x
 
 
-def wrap(draw: ImageDraw.ImageDraw, text: str, font, max_w: int) -> list[str]:
+def wrap(d, text, font, max_w):
     lines, line = [], ""
     for word in text.split():
         trial = (line + " " + word).strip()
-        if draw.textlength(trial, font=font) <= max_w:
+        if d.textlength(trial, font=font) <= max_w:
             line = trial
         else:
             if line:
@@ -85,67 +111,71 @@ def main() -> int:
     img = Image.new("RGB", (W, H), INK)
     d = ImageDraw.Draw(img)
 
-    f_head = ImageFont.truetype(SERIF_ITALIC_PATH, 56 * S)
-    f_kick = ImageFont.truetype(SANS_PATH, 17 * S)
-    f_legend = ImageFont.truetype(SANS_PATH, 19 * S)
-    f_attrib = ImageFont.truetype(SANS_PATH, 19 * S)
+    f_head = ImageFont.truetype(SERIF_ITALIC, 50 * S)
+    f_kick = ImageFont.truetype(SANS, 17 * S)
+    f_label = ImageFont.truetype(SANS, 16 * S)
+    f_verdict = ImageFont.truetype(SANS, 52 * S, index=1)   # Helvetica Bold
+    f_body = ImageFont.truetype(SANS, 18 * S)
+    f_note = ImageFont.truetype(SANS, 15 * S)
+    f_or = ImageFont.truetype(SERIF_ITALIC, 22 * S)
+    f_attrib = ImageFont.truetype(SANS, 19 * S)
 
-    # rust corner mark, matching the quote cards
+    # rust corner mark and rule, matching the quote cards
     d.rectangle([W - PAD - 18 * S, 90 * S, W - PAD, 108 * S], fill=RUST)
-
-    # short rust rule above the headline
     d.rectangle([PAD, 150 * S, PAD + 100 * S, 154 * S], fill=RUST)
 
-    # kicker
     track(d, (PAD, 178 * S), KICKER, f_kick, MUTED, 1.6 * S)
 
     # headline
-    y = 228 * S
+    y = 224 * S
     for line in wrap(d, HEADLINE, f_head, W - 2 * PAD):
         d.text((PAD, y), line, font=f_head, fill=PAPER)
-        y += 68 * S
+        y += 62 * S
 
-    # --- the unit chart ---
-    grid_w = COLS * PITCH - GAP
-    x0 = (W - grid_w) // 2
-    y0 = int(y) + 40 * S
+    # --- the two options ---
+    top = int(y) + 44 * S
+    gutter = 58 * S
+    col_w = (W - 2 * PAD - gutter) // 2
+    lx = PAD
+    rx = PAD + col_w + gutter
 
-    for i in range(TOTAL):
-        r, c = divmod(i, COLS)
-        cx = x0 + c * PITCH
-        cy = y0 + r * PITCH
-        if i == EXPLOITED_INDEX:
-            d.rectangle([cx, cy, cx + CELL, cy + CELL], fill=RUST)
-        else:
-            d.rectangle([cx, cy, cx + CELL, cy + CELL], fill=DIM)
+    d.line([PAD, top, W - PAD, top], fill=HAIRLINE, width=2)
 
-    # ring around the exploited cell — secondary encoding, so identity is
-    # never carried by colour alone (and so it survives feed downscaling)
-    er, ec = divmod(EXPLOITED_INDEX, COLS)
-    ecx = x0 + ec * PITCH + CELL / 2
-    ecy = y0 + er * PITCH + CELL / 2
-    rad = 23 * S
-    d.ellipse([ecx - rad, ecy - rad, ecx + rad, ecy + rad], outline=RUST, width=3 * S)
+    # the "or" sits on the rule, in the gutter — the dilemma made visual
+    f_dag = ImageFont.truetype(SANS, 15 * S)
+    ow = d.textlength("or", font=f_or) + d.textlength("†", font=f_dag) + 3 * S
+    ocx = lx + col_w + gutter / 2
+    d.rectangle([ocx - ow / 2 - 12 * S, top - 17 * S, ocx + ow / 2 + 12 * S, top + 17 * S],
+                fill=INK)
+    ex = ocx - ow / 2
+    d.text((ex, top - 16 * S), "or", font=f_or, fill=RUST)
+    d.text((ex + d.textlength("or", font=f_or) + 3 * S, top - 18 * S), "†",
+           font=f_dag, fill=RUST)
 
-    rows = -(-TOTAL // COLS)
-    grid_bottom = y0 + rows * PITCH - GAP
+    for x, label, verdict, star, body in (
+        (lx, LEFT_LABEL, LEFT_VERDICT, LEFT_STAR, LEFT_BODY),
+        (rx, RIGHT_LABEL, RIGHT_VERDICT, RIGHT_STAR, RIGHT_BODY),
+    ):
+        track(d, (x, top + 32 * S), label, f_label, MUTED, 1.5 * S)
+        vy = top + 68 * S
+        endx = track(d, (x, vy), verdict, f_verdict, PAPER, 1.0 * S)
+        d.text((endx + 4 * S, vy - 6 * S), star, font=f_verdict, fill=RUST)
+        by = vy + 88 * S
+        for line in wrap(d, body, f_body, col_w):
+            d.text((x, by), line, font=f_body, fill=FAINT)
+            by += 26 * S
 
-    # --- legend ---
-    ly = grid_bottom + 52 * S
-    sw = 14 * S
-    d.rectangle([x0, ly, x0 + sw, ly + sw], fill=RUST)
-    d.text((x0 + sw + 14 * S, ly - 4 * S),
-           "1  ·  CVE-2026-81963, exploitation detected",
-           font=f_legend, fill=PAPER)
+    # --- the asterisks ---
+    ny = 762 * S
+    d.line([PAD, ny - 34 * S, W - PAD, ny - 34 * S], fill=HAIRLINE, width=2)
+    for star, text in NOTES:
+        d.text((PAD, ny), star, font=f_note, fill=RUST)
+        for line in wrap(d, text, f_note, W - 2 * PAD - 36 * S):
+            d.text((PAD + 36 * S, ny), line, font=f_note, fill=FAINT)
+            ny += 20 * S
+        ny += 8 * S
 
-    ly2 = ly + 34 * S
-    d.rectangle([x0, ly2, x0 + sw, ly2 + sw], fill=DIM)
-    d.text((x0 + sw + 14 * S, ly2 - 4 * S),
-           "678  ·  everything else in the same package",
-           font=f_legend, fill=MUTED)
-
-    # --- attribution ---
-    d.text((PAD, H - 112 * S), ATTRIB, font=f_attrib, fill=MUTED)
+    d.text((PAD, H - 74 * S), ATTRIB, font=f_attrib, fill=MUTED)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     out = OUT_DIR / "you-cant-triage-a-bundle.png"

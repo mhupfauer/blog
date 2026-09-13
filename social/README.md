@@ -39,13 +39,14 @@ python3 social/linkedin/build/build-audiograms.py
 
 Square 1080×1080 feed images at `linkedin/out/creative/<post-slug>.png`, built by `linkedin/build/build-creative.py` like every other visual here — Pillow only, no credentials, deterministic, safe to re-run.
 
-**Make the creative a chart, not an illustration.** The first attempt at this used image generation, and it looked like stock AI art: a handsome motif that carried no information. A feed image has room for exactly one idea, and the idea should be a number you can defend. The current creative is a unit chart — one square per CVE in KB5122871, 679 of them, with the single square that is under active exploitation ringed in rust. The insight is the picture.
+**Make the creative carry an argument, not a mood.** The first attempt used image generation and looked like stock AI art: a handsome motif that said nothing. A feed image has room for exactly one idea, and the idea should be something you can defend with a number. The current card states a dilemma — install the update and RDS breaks, roll it back and you return all 679 fixes in the package — and hangs every caveat off an asterisk below it.
+
+**Put the nuance in footnotes rather than in the headline.** That split is what lets the hook stay blunt enough to stop a scroll while the card stays honest: the qualifications are all present for anyone who opens the image, and there is nothing to correct in the comments. On this card the dagger hangs off the word "or", because the note it points to is the one that says the binary is false.
 
 Rules that came out of building it:
 
 - **Numbers come from primary data.** The figures are counted from Microsoft's MSRC CVRF feed, not from press coverage. Anything on a public graphic gets verified first — the release-wide "966" is not the same as the 679 in one package, and putting the wrong one on a card invites a correction in the comments.
 - **Check it at feed size before shipping.** Downscale to 500 / 300 / 160px and look. Headline must survive 300px; the accent mark must stay findable.
-- **Validate the mark colours, don't eyeball them.** The grid grey was chosen with a palette validator against the rust accent: the first pick looked better but scored ΔE 7.9 under protanopia, which leaves a colourblind reader nothing but the ring. `#ABA79E` scores 15.8 and reads brighter anyway.
-- **Give the accent a second cue.** The exploited cell is rust *and* ringed *and* named in the legend, so identity never rests on colour alone.
+- **Validate any mark colours with a palette validator, don't eyeball them.** An earlier unit-chart version of this card used a grid grey that looked better but scored ΔE 7.9 against the rust accent under protanopia — near the floor. Never let meaning rest on colour alone; give the accent a second cue (a ring, a label, a position).
 
 Typography and palette follow the quote cards: ink black ground, Georgia Italic headline in cream, Helvetica for kicker and legend, rust rule and corner mark.
