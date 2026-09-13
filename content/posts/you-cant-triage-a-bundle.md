@@ -89,6 +89,104 @@ Nobody has ever had the human hours to write and maintain that per critical serv
 
 Two things, really: a machine that moves updates, and a brake you can reach without stopping the machine. The four pieces below split evenly between them.
 
+<figure class="post-diagram">
+<div class="diagram-scroll">
+<svg viewBox="0 0 720 756" role="img" aria-label="Swimlane diagram of an autonomous patch pipeline. Columns are Signal, Pipeline, Validation, Human and Production. The vendor bundle of 679 indivisible CVEs is ingested by the pipeline, which generates a ring predicate as IaC, enforced denies, detection rules and a test suite derived from production telemetry. Validation soaks that suite at production load in its own trust domain and signs an attestation. A human reads one diff and owns the invariants, then approves promotion to ringed production rollout under a rate cap. An invariant breach in production returns to a second human gate for risk acceptance, which kills the feature rather than the update. Production telemetry regenerates next month's test suite." font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" fill="currentColor">
+<title>Signal to deployment in an autonomous patch pipeline</title>
+<desc>Five columns show which actor does what: the vendor emits an indivisible bundle, the pipeline authors artifacts, a separate validation domain signs an attestation, a human gates on invariants and on risk acceptance, and production rolls out in rate-capped rings with a feedback loop back to test generation.</desc>
+<defs>
+<marker id="tb-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+<marker id="tb-arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#C25A2E"/></marker>
+</defs>
+
+<rect x="5" y="34" width="134" height="714" fill="currentColor" opacity="0.03"/>
+<rect x="149" y="34" width="134" height="714" fill="currentColor" opacity="0.03"/>
+<rect x="293" y="34" width="134" height="714" fill="currentColor" opacity="0.03"/>
+<rect x="437" y="34" width="134" height="714" fill="currentColor" opacity="0.045"/>
+<rect x="581" y="34" width="134" height="714" fill="currentColor" opacity="0.03"/>
+
+<g font-size="10" opacity="0.6" text-anchor="middle" letter-spacing="0.9">
+<text x="72" y="18">SIGNAL</text>
+<text x="216" y="18">PIPELINE</text>
+<text x="360" y="18">VALIDATION</text>
+<text x="504" y="18" fill="#C25A2E" opacity="1">HUMAN</text>
+<text x="648" y="18">PRODUCTION</text>
+</g>
+<line x1="5" y1="28" x2="715" y2="28" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+
+<rect x="11" y="46" width="122" height="72" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/>
+<text x="72" y="65" font-size="12" text-anchor="middle">Vendor bundle</text>
+<text x="72" y="83" font-size="13" text-anchor="middle" font-weight="600">679 CVEs</text>
+<text x="72" y="98" font-size="10" text-anchor="middle" opacity="0.7">all or none</text>
+<text x="72" y="112" font-size="10" text-anchor="middle" opacity="0.7">+ known-issue feed</text>
+
+<path d="M72,118 V133 H216 V148" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#tb-arrow)"/>
+<text x="144" y="129" font-size="10" text-anchor="middle" opacity="0.75">ingest</text>
+
+<rect x="155" y="148" width="122" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/>
+<text x="216" y="166" font-size="11.5" text-anchor="middle">Ring predicate</text>
+<text x="216" y="180" font-size="9.5" text-anchor="middle" opacity="0.7">as IaC</text>
+
+<rect x="155" y="195" width="122" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/>
+<text x="216" y="213" font-size="11.5" text-anchor="middle">Enforced denies</text>
+<text x="216" y="227" font-size="9.5" text-anchor="middle" opacity="0.7">the control</text>
+
+<rect x="155" y="242" width="122" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/>
+<text x="216" y="260" font-size="11.5" text-anchor="middle">Detection rules</text>
+<text x="216" y="274" font-size="9.5" text-anchor="middle" opacity="0.7">the sensor</text>
+
+<rect x="155" y="289" width="122" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/>
+<text x="216" y="307" font-size="11.5" text-anchor="middle">Test suite from</text>
+<text x="216" y="321" font-size="9.5" text-anchor="middle" opacity="0.7">prod telemetry</text>
+
+<path d="M216,329 V344 H360 V359" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#tb-arrow)"/>
+<text x="288" y="340" font-size="10" text-anchor="middle" opacity="0.75">to non-prod</text>
+
+<rect x="299" y="359" width="122" height="82" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/>
+<text x="360" y="379" font-size="11.5" text-anchor="middle">Soak at prod load</text>
+<text x="360" y="393" font-size="10" text-anchor="middle" opacity="0.7">hours, not minutes</text>
+<line x1="311" y1="402" x2="409" y2="402" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+<text x="360" y="418" font-size="11.5" text-anchor="middle">signs attestation</text>
+<text x="360" y="432" font-size="9.5" text-anchor="middle" opacity="0.7">own trust domain</text>
+
+<path d="M360,441 V456 H504 V471" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#tb-arrow)"/>
+<text x="432" y="452" font-size="10" text-anchor="middle" opacity="0.75">PR + attestation</text>
+
+<rect x="443" y="471" width="122" height="82" rx="3" fill="none" stroke="#C25A2E" stroke-width="1.8"/>
+<text x="504" y="490" font-size="9.5" text-anchor="middle" fill="#C25A2E" letter-spacing="0.8">HUMAN GATE</text>
+<text x="504" y="509" font-size="11.5" text-anchor="middle">Read one diff</text>
+<text x="504" y="525" font-size="11" text-anchor="middle">Own the invariants</text>
+<text x="504" y="540" font-size="9.5" text-anchor="middle" opacity="0.7">what &#8220;working&#8221; means</text>
+
+<path d="M504,553 V568 H648 V583" fill="none" stroke="#C25A2E" stroke-width="1.5" marker-end="url(#tb-arrow-accent)"/>
+<text x="576" y="564" font-size="10" text-anchor="middle" fill="#C25A2E">approve</text>
+
+<rect x="587" y="583" width="122" height="90" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/>
+<text x="648" y="602" font-size="11.5" text-anchor="middle">canary &#183; pilot</text>
+<text x="648" y="618" font-size="11.5" text-anchor="middle">broad &#183; critical</text>
+<line x1="599" y1="630" x2="697" y2="630" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+<text x="648" y="647" font-size="11" text-anchor="middle">&#8804; N hosts / hour</text>
+<text x="648" y="662" font-size="9.5" text-anchor="middle" opacity="0.7">one service in flight</text>
+
+<rect x="443" y="600" width="122" height="90" rx="3" fill="none" stroke="#C25A2E" stroke-width="1.8"/>
+<text x="504" y="619" font-size="9.5" text-anchor="middle" fill="#C25A2E" letter-spacing="0.8">HUMAN GATE</text>
+<text x="504" y="638" font-size="11.5" text-anchor="middle">Risk acceptance</text>
+<text x="504" y="654" font-size="10.5" text-anchor="middle">kill the feature,</text>
+<text x="504" y="669" font-size="10.5" text-anchor="middle">not the update &#8212;</text>
+<text x="504" y="684" font-size="10.5" text-anchor="middle">or hold the bundle</text>
+
+<path d="M648,673 V706 H504 V696" fill="none" stroke="#C25A2E" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#tb-arrow-accent)"/>
+<text x="578" y="701" font-size="10" text-anchor="middle" fill="#C25A2E">invariant breach</text>
+
+<path d="M565,637 H581" fill="none" stroke="#C25A2E" stroke-width="1.5" marker-end="url(#tb-arrow-accent)"/>
+
+<path d="M690,673 V730 H180 V335" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="5 3" opacity="0.75" marker-end="url(#tb-arrow)"/>
+<text x="447" y="725" font-size="10" text-anchor="middle" opacity="0.75">telemetry regenerates next month&#8217;s suite</text>
+</svg>
+</div>
+<figcaption>The machine authors, validates and deploys; the human is consulted twice — once on what &#8220;working&#8221; means before the rollout, once on carrying the exposure after something breaks. Nothing in the Signal column is separable, which is why every arrow after it is about containment rather than selection.</figcaption>
+</figure>
+
 **One: automate the pipeline, not the decision.** Rings are a solved idea, and nearly everyone who has them promotes between rings on a human calendar — which is exactly why the cadence is a month. Define the rings in IaC and define promotion as a machine-evaluable predicate over your own telemetry. Concretely, for a session-host fleet: a canary ring has accumulated at least *N* session-hours and *M* logoff cycles since the update landed; error rates on the top transactions sit within a defined band of the unpatched cohort still running beside it; telemetry coverage itself is above a floor, so that silence is treated as missing signal rather than as health; and any of those failing halts promotion rather than merely annotating it. The human writes and owns that predicate. The machine executes it, monthly, without a meeting. A model is genuinely good at generating and maintaining the Terraform, Bicep or Ansible underneath, and at reconciling the drift that makes most patch estates lie to you about their own coverage.
 
 Building this creates a new problem immediately — an automated system with standing rights to push vendor code to every host you own — and I will come back to it, because it is the price of everything in this section.

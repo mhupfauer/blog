@@ -6,3 +6,30 @@
     min-height: 0;
     margin-top: calc(var(--gap) / 2);
 }
+
+/* Inline SVG diagrams in posts. Strokes and text use currentColor so the
+   figure follows the light/dark theme; the rust accent is the only literal
+   hue. min-width keeps the drawing legible on phones by scrolling it
+   horizontally rather than shrinking the type below ~10px. */
+.post-diagram {
+    margin: 2rem 0;
+}
+
+.post-diagram .diagram-scroll {
+    overflow-x: auto;
+}
+
+.post-diagram .diagram-scroll svg {
+    display: block;
+    width: 100%;
+    min-width: 680px;
+    height: auto;
+}
+
+.post-diagram figcaption {
+    font-size: 0.85rem;
+    opacity: 0.72;
+    line-height: 1.5;
+    margin-top: 0.7rem;
+}
+
