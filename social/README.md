@@ -35,16 +35,17 @@ python3 social/linkedin/build/build-carousel.py
 python3 social/linkedin/build/build-audiograms.py
 ```
 
-## Creatives (AI-generated)
+## Creatives
 
-Square 1080x1080 feed images live in `linkedin/out/creative/<post-slug>.png`. Unlike the quote cards and carousel, these are **not** rebuildable from `linkedin/build/` — they come from `scripts/gen-social-creative.py`, which is gitignored because it carries an API key, and image generation is not deterministic. The committed PNG is the master; re-running produces a different image.
+Square 1080×1080 feed images at `linkedin/out/creative/<post-slug>.png`, built by `linkedin/build/build-creative.py` like every other visual here — Pillow only, no credentials, deterministic, safe to re-run.
 
-```sh
-./scripts/gen-social-creative.py <post-slug> "<visual concept>" --variants 2
-```
+**Make the creative a chart, not an illustration.** The first attempt at this used image generation, and it looked like stock AI art: a handsome motif that carried no information. A feed image has room for exactly one idea, and the idea should be a number you can defend. The current creative is a unit chart — one square per CVE in KB5122871, 679 of them, with the single square that is under active exploitation ringed in rust. The insight is the picture.
 
-Two things that matter, both learned by getting them wrong first:
+Rules that came out of building it:
 
-- Use `gpt-image-2.5-flare`, not `gpt-image-2.5-sunburst`. Sunburst draws much finer line work, which moires into a flat grey block the moment LinkedIn rescales the image to feed width — the motif disappears entirely.
-- The script's `FRAMING` prompt block forces the motif to fill ~70% of the frame and to survive being scaled to 300px. Without it you get an elegant small motif with lots of negative space that reads as nothing in a feed. The blog *cover* style guide optimises for a wide hero image on a white page; a feed creative has a different job and needs the accent colour to carry at thumbnail size.
+- **Numbers come from primary data.** The figures are counted from Microsoft's MSRC CVRF feed, not from press coverage. Anything on a public graphic gets verified first — the release-wide "966" is not the same as the 679 in one package, and putting the wrong one on a card invites a correction in the comments.
+- **Check it at feed size before shipping.** Downscale to 500 / 300 / 160px and look. Headline must survive 300px; the accent mark must stay findable.
+- **Validate the mark colours, don't eyeball them.** The grid grey was chosen with a palette validator against the rust accent: the first pick looked better but scored ΔE 7.9 under protanopia, which leaves a colourblind reader nothing but the ring. `#ABA79E` scores 15.8 and reads brighter anyway.
+- **Give the accent a second cue.** The exploited cell is rust *and* ringed *and* named in the legend, so identity never rests on colour alone.
 
+Typography and palette follow the quote cards: ink black ground, Georgia Italic headline in cream, Helvetica for kicker and legend, rust rule and corner mark.
